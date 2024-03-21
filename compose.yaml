@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: gw_backend
+      POSTGRES_PASSWORD: THIS_IS_NOT_A_PRODUCTION_PASSWORD
+      POSTGRES_DB: gw
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://gw_backend:THIS_IS_NOT_A_PRODUCTION_PASSWORD@db:5432/gw
+    ports:
+      - "8000:8000"
+  frontend:
+    build: ./frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  pgdata:
+
