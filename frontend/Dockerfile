@@ -11,11 +11,11 @@ RUN pnpm install
 
 COPY . /app
 
-RUN pnpm run build
+# RUN pnpm run build
 
-FROM jitesoft/lighttpd
+# FROM jitesoft/lighttpd
 
-COPY --from=build /app/dist /var/www/html/
+# COPY --from=build /app/dist /var/www/html/
 
-EXPOSE 80
+# EXPOSE 80
 
