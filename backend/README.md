@@ -7,3 +7,5 @@ The backend of gw handles storing assignments, courses, users, and other info, c
 - gw-analyzer, handling insights, is a daemon that periodically analyzes grades and stores all results into the "insights" table.
 
 - gw-updater, handling grade auto-updating, is a web-scraper run periodically to scrape grades from multiple school districts' grade books.
+
+The database is provided by the compose.yaml at the environment variable `DATABASE_URL`.
