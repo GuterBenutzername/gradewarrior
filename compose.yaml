@@ -16,19 +16,19 @@ services:
   backend:
     build: ./backend
     restart: always
-    depends_on:
-      - db
+    # depends_on: #this takes forever on COBALT
+    #   - db
     environment:
-      DATABASE_URL: postgres://gw_backend:THIS_IS_NOT_A_PRODUCTION_PASSWORD@db:5432/gw
+      DATABASE_URL: postgresql://gw_backend:THIS_IS_NOT_A_PRODUCTION_PASSWORD@db:5432/gw
     ports:
       - "8000:8000"
-  frontend:
-    build: ./frontend
-    restart: always
-    depends_on:
-      - backend
-    ports:
-      - "80:80"
+  # frontend: # no frontend yet so we don't need to start and stop it everytime we make a change
+  #   build: ./frontend
+  #   restart: always
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - "80:80"
 
 volumes:
   pgdata:
