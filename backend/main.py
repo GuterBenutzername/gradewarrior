@@ -1,11 +1,54 @@
 from ariadne import QueryType, MutationType, gql, make_executable_schema
 from ariadne.asgi import GraphQL
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, selectinload
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
-import os
+import os, uuid
+
+# Create the executable schema
+type_defs = gql("""
+    type User {
+        id: ID!
+        name: String!
+        email: String!
+        courses: [Course!]!
+    }
+    type Course {
+        id: ID!
+        name: String!
+        user: User!
+        assignments: [Assignment!]!
+    }
+    type Assignment {
+        id: ID!
+        name: String!
+        grade: Float
+        weight: Float
+        t: Boolean
+        course: Course!
+    }
+    type Query {
+        users: [User!]!
+        user(id: ID!): User
+        courses: [Course!]!
+        course(id: ID!): Course
+        assignments: [Assignment!]!
+        assignment(id: ID!): Assignment
+    }
+    type Mutation {
+        createUser(name: String!, email: String!): User!
+        updateUser(id: ID!, name: String, email: String): User!
+        deleteUser(id: ID!): User!
+        createCourse(name: String!, userId: ID!): Course!
+        updateCourse(id: ID!, name: String): Course!
+        deleteCourse(id: ID!): Course!
+        createAssignment(name: String!, grade: Float, weight: Float, t: Boolean, courseId: ID!): Assignment!
+        updateAssignment(id: ID!, name: String, grade: Float, weight: Float, t: Boolean): Assignment!
+        deleteAssignment(id: ID!): Assignment!
+    }
+""")
 
 # Set up the database connection
 engine = create_engine(os.environ['DATABASE_URL'])
@@ -15,32 +58,31 @@ Base = declarative_base()
 # Define the database models
 class User(Base):
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
+    id = Column(String, primary_key=True)
     name = Column(String)
     email = Column(String)
-    courses = relationship('Course', back_populates='user')
+    courses = relationship('Course', back_populates='user',lazy="selectin", cascade="all, delete")
 
 class Course(Base):
     __tablename__ = 'courses'
-    id = Column(Integer, primary_key=True)
+    id = Column(String, primary_key=True)
     name = Column(String)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    user = relationship('User', back_populates='courses')
-    assignments = relationship('Assignment', back_populates='course')
+    user_id = Column(String, ForeignKey('users.id'))
+    user = relationship('User', back_populates='courses',lazy="selectin")
+    assignments = relationship('Assignment', back_populates='course',lazy="selectin", cascade="all, delete")
 
 class Assignment(Base):
     __tablename__ = 'assignments'
-    id = Column(Integer, primary_key=True)
+    id = Column(String, primary_key=True)
     name = Column(String)
     grade = Column(Float)
     weight = Column(Float)
     t = Column(Boolean)
-    course_id = Column(Integer, ForeignKey('courses.id'))
-    course = relationship('Course', back_populates='assignments')
+    course_id = Column(String, ForeignKey('courses.id'))
+    course = relationship('Course', back_populates='assignments',lazy="selectin")
 
 # Create the database tables
 Base.metadata.create_all(engine)
-
 # Define the query resolvers
 query = QueryType()
 
@@ -92,7 +134,8 @@ mutation = MutationType()
 @mutation.field('createUser')
 def resolve_create_user(_, info, name, email):
     session = Session()
-    user = User(name=name, email=email)
+    id = uuid.uuid4().hex
+    user = User(id=id,name=name, email=email)
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -124,7 +167,8 @@ def resolve_delete_user(_, info, id):
 @mutation.field('createCourse')
 def resolve_create_course(_, info, name, userId):
     session = Session()
-    course = Course(name=name, user_id=userId)
+    id = uuid.uuid4().hex
+    course = Course(id=id,name=name, user_id=userId)
     session.add(course)
     session.commit()
     session.refresh(course)
@@ -154,7 +198,8 @@ def resolve_delete_course(_, info, id):
 @mutation.field('createAssignment')
 def resolve_create_assignment(_, info, name, grade, weight, t, courseId):
     session = Session()
-    assignment = Assignment(name=name, grade=grade, weight=weight, t=t, course_id=courseId)
+    id = uuid.uuid4().hex
+    assignment = Assignment(id=id,name=name, grade=grade, weight=weight, t=t, course_id=courseId)
     session.add(assignment)
     session.commit()
     session.refresh(assignment)
@@ -186,49 +231,6 @@ def resolve_delete_assignment(_, info, id):
     session.commit()
     session.close()
     return assignment
-
-# Create the executable schema
-type_defs = gql("""
-    type User {
-        id: ID!
-        name: String!
-        email: String!
-        courses: [Course!]!
-    }
-    type Course {
-        id: ID!
-        name: String!
-        user: User!
-        assignments: [Assignment!]!
-    }
-    type Assignment {
-        id: ID!
-        name: String!
-        grade: Float
-        weight: Float
-        t: Boolean
-        course: Course!
-    }
-    type Query {
-        users: [User!]!
-        user(id: ID!): User
-        courses: [Course!]!
-        course(id: ID!): Course
-        assignments: [Assignment!]!
-        assignment(id: ID!): Assignment
-    }
-    type Mutation {
-        createUser(name: String!, email: String!): User!
-        updateUser(id: ID!, name: String, email: String): User!
-        deleteUser(id: ID!): User!
-        createCourse(name: String!, userId: ID!): Course!
-        updateCourse(id: ID!, name: String): Course!
-        deleteCourse(id: ID!): Course!
-        createAssignment(name: String!, grade: Float, weight: Float, t: Boolean, courseId: ID!): Assignment!
-        updateAssignment(id: ID!, name: String, grade: Float, weight: Float, t: Boolean): Assignment!
-        deleteAssignment(id: ID!): Assignment!
-    }
-""")
 
 schema = make_executable_schema(type_defs, query, mutation)
 app = GraphQL(schema, debug=True)
