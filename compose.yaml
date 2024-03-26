@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: gw_backend
+      POSTGRES_PASSWORD: THIS_IS_NOT_A_PRODUCTION_PASSWORD
+      POSTGRES_DB: gw
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload # remove --reload for prod
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://gw_backend:THIS_IS_NOT_A_PRODUCTION_PASSWORD@db:5432/gw
+    ports:
+      - "8000:8000"
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: ./app
+        - action: rebuild
+          path: ./backend/requirements.txt
+
+  frontend:
+    build: ./frontend
+    command: pnpm run dev # remove and uncomment all lines in frontend/Dockerfile for prod
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: ./app
+        - action: rebuild
+          path: ./frontend/package.json
+          ignore:
+            - 'node_modules'
+
+volumes:
+  pgdata:
+

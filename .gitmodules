@@ -1,3 +1,0 @@
-[submodule "frontend/src/sanitizecss"]
-	path = frontend/src/sanitizecss
-	url = https://github.com/csstools/sanitize.css.git

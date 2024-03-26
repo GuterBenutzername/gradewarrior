@@ -1,0 +1,4 @@
+ariadne
+uvicorn
+sqlalchemy
+psycopg2
