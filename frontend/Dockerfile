@@ -1,4 +1,3 @@
-# frontend/Dockerfile
 FROM node AS build
 
 WORKDIR /app
