@@ -33,7 +33,7 @@ services:
 
   frontend:
     build: ./frontend
-    command: pnpm run dev # remove and uncomment all lines in frontend/Dockerfile for prod
+    command: pnpm run dev --host --port 80 # remove and uncomment all lines in frontend/Dockerfile for prod
     restart: always
     depends_on:
       - backend
