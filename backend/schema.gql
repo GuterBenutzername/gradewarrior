@@ -1,0 +1,55 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  courses: [Course!]!
+}
+
+type Course {
+  id: ID!
+  name: String!
+  user: User!
+  assignments: [Assignment!]!
+}
+
+type Assignment {
+  id: ID!
+  name: String!
+  grade: Float
+  weight: Float
+  t: Boolean
+  course: Course!
+}
+
+type Query {
+  users: [User!]!
+  user(id: ID!): User
+  courses: [Course!]!
+  course(id: ID!): Course
+  assignments: [Assignment!]!
+  assignment(id: ID!): Assignment
+}
+
+type Mutation {
+  createUser(name: String!, email: String!): User!
+  updateUser(id: ID!, name: String, email: String): User!
+  deleteUser(id: ID!): User!
+  createCourse(name: String!, userId: ID!): Course!
+  updateCourse(id: ID!, name: String): Course!
+  deleteCourse(id: ID!): Course!
+  createAssignment(
+    name: String!
+    grade: Float
+    weight: Float
+    t: Boolean
+    courseId: ID!
+  ): Assignment!
+  updateAssignment(
+    id: ID!
+    name: String
+    grade: Float
+    weight: Float
+    t: Boolean
+  ): Assignment!
+  deleteAssignment(id: ID!): Assignment!
+}
