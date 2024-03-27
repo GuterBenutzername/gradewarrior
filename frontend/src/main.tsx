@@ -1,9 +1,16 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
 import "./index.css";
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <p>frontend</p>
-  </React.StrictMode>
-);
+import React from "react";
+import ReactDOM from "react-dom/client";
+
+if (typeof window !== "undefined") {
+  const root = document.querySelector("#root");
+
+  if (root) {
+    ReactDOM.createRoot(root).render(
+      <React.StrictMode>
+        <p>frontend</p>
+      </React.StrictMode>,
+    );
+  }
+}

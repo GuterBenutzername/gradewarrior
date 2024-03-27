@@ -1,0 +1,27 @@
+{
+  "root": true,
+
+  "extends": [
+    "hardcore",
+    "hardcore/react",
+    "hardcore/react-performance",
+    "hardcore/fp",
+    "hardcore/ts",
+    "prettier"
+  ],
+
+  "parserOptions": {
+    "project": true
+  },
+
+  "ignorePatterns": ["vite.config.ts"],
+
+  "env": {
+    "browser": true
+  },
+  "rules": {
+    "@typescript-eslint/naming-convention": "off",
+    "import/default": "off",
+    "import/no-named-as-default-member": "off"
+  }
+}
