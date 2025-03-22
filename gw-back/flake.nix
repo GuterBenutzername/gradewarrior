@@ -6,8 +6,14 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
       in
@@ -19,7 +25,7 @@
             python313Packages.sqlalchemy
             python313Packages.uvicorn
             python313Packages.starlette
-	    python313Packages.psycopg2
+            python313Packages.psycopg2
           ];
         };
       }

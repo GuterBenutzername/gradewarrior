@@ -6,8 +6,14 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
       in
@@ -23,10 +29,10 @@
           default = pkgs.stdenv.mkDerivation {
             name = "gradewarrior-frontend";
             src = ./.;
-            
+
             nativeBuildInputs = with pkgs; [
               deno
-	      nodejs
+              nodejs
             ];
 
             buildPhase = ''
