@@ -15,8 +15,10 @@
     "jsxImportSource": "preact"
   },
   "imports": {
+    "@apollo/client": "npm:@apollo/client@^3.13.5",
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.4",
     "@preact/preset-vite": "npm:@preact/preset-vite@^2.10.1",
+    "graphql": "npm:graphql@^16.10.0",
     "preact": "npm:preact@^10.26.2",
     "vite": "npm:vite@^6.1.1"
   }
