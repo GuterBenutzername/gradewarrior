@@ -70,6 +70,4 @@ type Mutation {
     createAssignment(input: CreateAssignmentInput!): Assignment!
     updateAssignment(input: UpdateAssignmentInput!): Assignment!
     deleteAssignment(id: ID!): ID!
-
-    addAssignmentToCourse(courseId: ID!, assignmentId: ID!): Course # Example of explicitly adding an existing assignment
 }

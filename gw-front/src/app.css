@@ -1,1 +1,270 @@
+.App {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
 
+h1 {
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+}
+
+h2 {
+  color: #3498db;
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.assignment-info {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.assignment-grade {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.assignment-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+input {
+  background-color: white;
+  border: 1px solid #dfe6e9;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  outline: none;
+}
+
+.name-input {
+  flex-grow: 1;
+  min-width: 150px;
+}
+
+.weight-input {
+  width: 60px;
+  text-align: right;
+}
+
+.grade-input {
+  width: 80px;
+}
+
+.weight-container {
+  display: flex;
+  align-items: center;
+  background-color: #e1f0fa;
+  border-radius: 4px;
+  padding-right: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.weight-container input {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
+}
+
+.weight-symbol {
+  color: #2980b9;
+  font-weight: 500;
+  position: relative;
+  left: 0.25rem;
+}
+
+.course {
+  background-color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 0.75rem;
+}
+
+.course-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.edit-course-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.course-name-input {
+  flex-grow: 1;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 0.5rem;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.delete-btn {
+  background-color: #ff6b6b;
+  color: white;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.2rem;
+}
+
+.delete-btn:hover {
+  background-color: #fa5252;
+  transform: scale(1.05);
+}
+
+.add-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.add-btn:hover {
+  background-color: #43a047;
+}
+
+.add-btn:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.save-btn {
+  background-color: #3498db;
+  color: white;
+}
+
+.save-btn:hover {
+  background-color: #2980b9;
+}
+
+.edit-course-btn {
+  background-color: #3498db;
+  color: white;
+}
+
+.edit-course-btn:hover {
+  background-color: #2980b9;
+}
+
+.delete-course-btn {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+.delete-course-btn:hover {
+  background-color: #fa5252;
+}
+
+.add-assignment-btn, .add-course-btn {
+  background-color: #f1f1f1;
+  color: #555;
+  padding: 0.7rem;
+  width: 100%;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.add-assignment-btn:hover, .add-course-btn:hover {
+  background-color: #e9e9e9;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.new-course-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  color: #6c757d;
+}
+
+.empty-assignments {
+  text-align: center;
+  padding: 1.5rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.new-assignment-form {
+  background-color: #f0f8ff;
+  border: 1px dashed #add8e6;
+}
