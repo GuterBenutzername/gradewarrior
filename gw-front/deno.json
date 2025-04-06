@@ -3,7 +3,8 @@
     "dev": "deno run -A --node-modules-dir npm:vite",
     "build": "deno run -A --node-modules-dir npm:vite build",
     "preview": "deno run -A --node-modules-dir npm:vite preview",
-    "serve": "deno run --allow-net --allow-read jsr:@std/http@1/file-server dist/"
+    "serve": "deno run --allow-net --allow-read jsr:@std/http@1/file-server dist/",
+    "test": "deno run -A --node-modules-dir npm:vitest"
   },
   "compilerOptions": {
     "lib": [
@@ -18,9 +19,14 @@
     "@apollo/client": "npm:@apollo/client@^3.13.5",
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.4",
     "@preact/preset-vite": "npm:@preact/preset-vite@^2.10.1",
+    "@testing-library/jest-dom": "npm:@testing-library/jest-dom@^6.6.3",
+    "@testing-library/preact": "npm:@testing-library/preact@^3.2.4",
+    "global-jsdom": "npm:global-jsdom@^26.0.0",
     "graphql": "npm:graphql@^16.10.0",
+    "jsdom": "npm:jsdom@^26.0.0",
     "preact": "npm:preact@^10.26.2",
-    "vite": "npm:vite@^6.1.1"
+    "vite": "npm:vite@^6.1.1",
+    "vitest": "npm:vitest@^3.1.1"
   },
   "lint": {
     "rules": {

@@ -65,7 +65,7 @@ const AssignmentForm: FunctionComponent<AssignmentFormProps> = ({ data, onSubmit
           <button
             type="button"
             className="add-btn"
-            onClick={onSubmit}
+            onClick={() => { if (data.name.length > 0) { onSubmit() } }}
             disabled={!data.name}
           >
             Add
