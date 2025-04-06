@@ -99,7 +99,7 @@ export function App() {
 
   const handleDeleteAssignment = async (id: string) => {
     if (confirm("Are you sure you want to delete this assignment?")) {
-      await deleteAssignment({ 
+      await deleteAssignment({
         variables: { id },
         update: (cache) => {
           cache.evict({ id: `Assignment:${id}` });
@@ -173,7 +173,7 @@ export function App() {
 
   const handleDeleteCourse = async (id: string) => {
     if (confirm("Are you sure you want to delete this course and all its assignments?")) {
-      await deleteCourse({ 
+      await deleteCourse({
         variables: { id },
         update: (cache) => {
           cache.evict({ id: `Course:${id}` });
@@ -188,7 +188,7 @@ export function App() {
     setEditingCourseId(course.id);
     setEditingCourseName(course.name);
   };
-  
+
   return (
     <div className="App">
       <header className="app-header">
@@ -212,7 +212,7 @@ export function App() {
                 }}
                 autoFocus
               />
-              <button 
+              <button
                 type="button"
                 className="add-btn"
                 onClick={handleCreateCourse}
@@ -220,7 +220,7 @@ export function App() {
               >
                 Add
               </button>
-              <button 
+              <button
                 type="button"
                 className="cancel-btn"
                 onClick={() => setShowNewCourseInput(false)}
@@ -229,7 +229,7 @@ export function App() {
               </button>
             </div>
           ) : (
-            <button 
+            <button
               type="button"
               className="add-course-btn"
               onClick={() => setShowNewCourseInput(true)}
@@ -273,7 +273,7 @@ export function App() {
                     }}
                     autoFocus
                   />
-                  <button 
+                  <button
                     type="button"
                     className="save-btn"
                     onClick={() => handleUpdateCourse(course.id, editingCourseName)}
@@ -286,7 +286,7 @@ export function App() {
                 <>
                   <h2>{course.name}</h2>
                   <div className="course-actions">
-                    <button 
+                    <button
                       type="button"
                       className="edit-course-btn"
                       onClick={() => startEditingCourse(course)}
@@ -294,7 +294,7 @@ export function App() {
                     >
                       Edit
                     </button>
-                    <button 
+                    <button
                       type="button"
                       className="delete-course-btn"
                       onClick={() => handleDeleteCourse(course.id)}
@@ -309,7 +309,6 @@ export function App() {
 
             {course.assignments.length === 0 ? (
               <div className="empty-assignments">
-                <p>No assignments yet.</p>
               </div>
             ) : (
               <ul>
@@ -353,10 +352,10 @@ export function App() {
                       </div>
                     </div>
                     <div className="assignment-grade">
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         className="grade-input"
-                        value={assignment.grade} 
+                        value={assignment.grade}
                         onBlur={(e) => {
                           if (e.target instanceof HTMLInputElement && parseFloat(e.target.value) !== assignment.grade) {
                             handleUpdateAssignment(assignment.id, 'grade', e.target.value);
@@ -368,7 +367,7 @@ export function App() {
                           }
                         }}
                       />
-                      <button 
+                      <button
                         type="button"
                         className="delete-btn"
                         onClick={() => handleDeleteAssignment(assignment.id)}
@@ -379,97 +378,98 @@ export function App() {
                     </div>
                   </li>
                 ))}
-                
-                {/* New Assignment Form */}
-                <li className="new-assignment-form">
-                  {newAssignmentData.courseId === course.id ? (
-                    <>
-                      <div className="assignment-info">
-                        <input
-                          type="text"
-                          className="name-input"
-                          placeholder="New assignment name"
-                          value={newAssignmentData.name}
-                          onChange={(e) => {
-                            if (e.target instanceof HTMLInputElement) {
-                              setNewAssignmentData({
-                                ...newAssignmentData,
-                                name: e.target.value
-                              });
-                            }
-                          }}
-                        />
-                        <div className="weight-container">
-                          <input
-                            type="number"
-                            className="weight-input"
-                            placeholder="Weight"
-                            value={newAssignmentData.weight}
-                            min="0"
-                            max="100"
-                            onChange={(e) => {
-                              if (e.target instanceof HTMLInputElement) {
-                                setNewAssignmentData({
-                                  ...newAssignmentData,
-                                  weight: parseFloat(e.target.value) || 0
-                                });
-                              }
-                            }}
-                          />
-                          <span className="weight-symbol">%</span>
-                        </div>
-                      </div>
-                      <div className="assignment-grade">
-                        <input 
-                          type="number" 
-                          className="grade-input"
-                          placeholder="Grade"
-                          value={newAssignmentData.grade}
-                          onChange={(e) => {
-                            if (e.target instanceof HTMLInputElement) {
-                              setNewAssignmentData({
-                                ...newAssignmentData,
-                                grade: parseFloat(e.target.value) || 0
-                              });
-                            }
-                          }}
-                        />
-                        <div className="assignment-actions">
-                          <button 
-                            type="button"
-                            className="add-btn"
-                            onClick={() => handleCreateAssignment(course.id)}
-                            disabled={!newAssignmentData.name}
-                          >
-                            Add
-                          </button>
-                          <button 
-                            type="button"
-                            className="cancel-btn"
-                            onClick={() => setNewAssignmentData({
-                              name: "",
-                              grade: 0,
-                              weight: 0,
-                              courseId: null
-                            })}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <button 
-                      type="button"
-                      className="add-assignment-btn"
-                      onClick={() => handleCreateAssignment(course.id)}
-                    >
-                      + Add Assignment
-                    </button>
-                  )}
-                </li>
+
               </ul>
             )}
+            {/* New Assignment Form */}
+            <li className="new-assignment-form">
+              {newAssignmentData.courseId === course.id ? (
+                <>
+                  <div className="assignment-info">
+                    <input
+                      type="text"
+                      className="name-input"
+                      placeholder="New assignment name"
+                      value={newAssignmentData.name}
+                      onChange={(e) => {
+                        if (e.target instanceof HTMLInputElement) {
+                          setNewAssignmentData({
+                            ...newAssignmentData,
+                            name: e.target.value
+                          });
+                        }
+                      }}
+                    />
+                    <div className="weight-container">
+                      <input
+                        type="number"
+                        className="weight-input"
+                        placeholder="Weight"
+                        value={newAssignmentData.weight}
+                        min="0"
+                        max="100"
+                        onChange={(e) => {
+                          if (e.target instanceof HTMLInputElement) {
+                            setNewAssignmentData({
+                              ...newAssignmentData,
+                              weight: parseFloat(e.target.value) || 0
+                            });
+                          }
+                        }}
+                      />
+                      <span className="weight-symbol">%</span>
+                    </div>
+                  </div>
+                  <div className="assignment-grade">
+                    <input
+                      type="number"
+                      className="grade-input"
+                      placeholder="Grade"
+                      value={newAssignmentData.grade}
+                      onChange={(e) => {
+                        if (e.target instanceof HTMLInputElement) {
+                          setNewAssignmentData({
+                            ...newAssignmentData,
+                            grade: parseFloat(e.target.value) || 0
+                          });
+                        }
+                      }}
+                    />
+                    <div className="assignment-actions">
+                      <button
+                        type="button"
+                        className="add-btn"
+                        onClick={() => handleCreateAssignment(course.id)}
+                        disabled={!newAssignmentData.name}
+                      >
+                        Add
+                      </button>
+                      <button
+                        type="button"
+                        className="cancel-btn"
+                        onClick={() => setNewAssignmentData({
+                          name: "",
+                          grade: 0,
+                          weight: 0,
+                          courseId: null
+                        })}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="add-assignment-btn"
+                  onClick={() => handleCreateAssignment(course.id)}
+                >
+                  + Add Assignment
+                </button>
+              )}
+            </li>
+
           </div>
         ))
       )}
