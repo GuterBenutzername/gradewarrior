@@ -1,5 +1,5 @@
 import { FunctionComponent } from "preact";
-import { Course } from "../types";
+import { Course } from "../types.ts";
 
 interface CourseHeaderProps {
   course: Course;

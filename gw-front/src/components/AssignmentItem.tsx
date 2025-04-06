@@ -1,5 +1,5 @@
 import { FunctionComponent } from "preact";
-import { Assignment } from "../types";
+import { Assignment } from "../types.ts";
 
 interface AssignmentItemProps {
   assignment: Assignment;
