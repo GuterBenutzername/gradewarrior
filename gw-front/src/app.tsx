@@ -1,97 +1,49 @@
 import "./app.css";
-import { gql, useQuery, useMutation } from "@apollo/client";
+import { useQuery, useMutation } from "@apollo/client";
 import { Assignment, Course } from "./types.ts";
 import { useState } from "preact/hooks";
+import { QUERIES, MUTATIONS } from "./graphql/index.ts";
+
+// Components
+import AssignmentForm from "./components/AssignmentForm.tsx";
+import AssignmentItem from "./components/AssignmentItem.tsx";
+import CourseForm from "./components/CourseForm.tsx";
+import CourseHeader from "./components/CourseHeader.tsx";
+
+// Initial state values
+const initialAssignmentData = {
+  name: "",
+  grade: 0,
+  weight: 0,
+  courseId: null as string | null
+};
 
 export function App() {
-  const { loading, error, data, refetch } = useQuery(gql`
-      query GetCourses {
-        courses {
-          name
-          id
-          assignments {
-            name
-            grade
-            weight
-            id
-          }
-        }
-      }
-    `);
+  // Queries
+  const { loading, error, data, refetch } = useQuery(QUERIES.GET_COURSES);
 
+  // State management
   const [newCourseName, setNewCourseName] = useState("");
   const [showNewCourseInput, setShowNewCourseInput] = useState(false);
   const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
   const [editingCourseName, setEditingCourseName] = useState("");
+  const [newAssignmentData, setNewAssignmentData] = useState({...initialAssignmentData});
 
-  const [newAssignmentData, setNewAssignmentData] = useState<{
-    name: string;
-    grade: number;
-    weight: number;
-    courseId: string | null;
-  }>({
-    name: "",
-    grade: 0,
-    weight: 0,
-    courseId: null
-  });
+  // Mutations
+  const [createCourse] = useMutation(MUTATIONS.CREATE_COURSE);
+  const [updateCourse] = useMutation(MUTATIONS.UPDATE_COURSE);
+  const [deleteCourse] = useMutation(MUTATIONS.DELETE_COURSE);
+  const [createAssignment] = useMutation(MUTATIONS.CREATE_ASSIGNMENT);
+  const [updateAssignment] = useMutation(MUTATIONS.UPDATE_ASSIGNMENT);
+  const [deleteAssignment] = useMutation(MUTATIONS.DELETE_ASSIGNMENT);
 
-  const [createCourse] = useMutation(gql`
-    mutation CreateCourse($name: String!) {
-      createCourse(input: {name: $name}) {
-        id
-        name
-      }
-    }
-  `);
-
-  const [updateCourse] = useMutation(gql`
-    mutation UpdateCourse($id: ID!, $name: String) {
-      updateCourse(input: {id: $id, name: $name}) {
-        id
-        name
-      }
-    }
-  `);
-
-  const [deleteCourse] = useMutation(gql`
-    mutation DeleteCourse($id: ID!) {
-      deleteCourse(id: $id)
-    }
-  `);
-
-  const [createAssignment] = useMutation(gql`
-    mutation CreateAssignment($name: String!, $grade: Float!, $weight: Float!, $courseId: ID!) {
-      createAssignment(input: {name: $name, grade: $grade, weight: $weight, courseId: $courseId}) {
-        id
-        name
-        grade
-        weight
-      }
-    }
-  `);
-
-  const [updateAssignment] = useMutation(gql`
-    mutation UpdateAssignment($id: ID!, $grade: Float, $name: String, $weight: Float) {
-      updateAssignment(input: {id: $id, grade: $grade, name: $name, weight: $weight}) {
-        id
-        grade
-        name
-        weight
-      }
-    }
-  `);
-
-  const [deleteAssignment] = useMutation(gql`
-    mutation DeleteAssignment($id: ID!) {
-      deleteAssignment(id: $id)
-    }
-  `);
-
+  // Loading and error states
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
+  // Handlers for assignments
   const handleUpdateAssignment = (id: string, field: 'grade' | 'name' | 'weight', value: string | number) => {
+    // deno-lint-ignore no-explicit-any
     const variables: any = { id };
     variables[field] = typeof value === 'string' && field !== 'name' ? parseFloat(value) : value;
     updateAssignment({ variables });
@@ -114,9 +66,7 @@ export function App() {
     if (!newAssignmentData.name || newAssignmentData.courseId !== courseId) {
       // Reset form and select this course
       setNewAssignmentData({
-        name: "",
-        grade: 0,
-        weight: 0,
+        ...initialAssignmentData,
         courseId
       });
       return;
@@ -132,16 +82,11 @@ export function App() {
     });
 
     // Reset form
-    setNewAssignmentData({
-      name: "",
-      grade: 0,
-      weight: 0,
-      courseId: null
-    });
-
+    setNewAssignmentData({...initialAssignmentData});
     refetch();
   };
 
+  // Handlers for courses
   const handleCreateCourse = async () => {
     if (!newCourseName) {
       setShowNewCourseInput(true);
@@ -195,39 +140,12 @@ export function App() {
         <h1>GradeWarrior</h1>
         <div className="actions">
           {showNewCourseInput ? (
-            <div className="new-course-form">
-              <input
-                type="text"
-                placeholder="Course name"
-                value={newCourseName}
-                onChange={(e) => {
-                  if (e.target instanceof HTMLInputElement) {
-                    setNewCourseName(e.target.value);
-                  }
-                }}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && newCourseName) {
-                    handleCreateCourse();
-                  }
-                }}
-                autoFocus
-              />
-              <button
-                type="button"
-                className="add-btn"
-                onClick={handleCreateCourse}
-                disabled={!newCourseName}
-              >
-                Add
-              </button>
-              <button
-                type="button"
-                className="cancel-btn"
-                onClick={() => setShowNewCourseInput(false)}
-              >
-                Cancel
-              </button>
-            </div>
+            <CourseForm
+              name={newCourseName}
+              onNameChange={setNewCourseName}
+              onSubmit={handleCreateCourse}
+              onCancel={() => setShowNewCourseInput(false)}
+            />
           ) : (
             <button
               type="button"
@@ -247,218 +165,39 @@ export function App() {
       ) : (
         data.courses.map((course: Course) => (
           <div key={course.id} className="course">
-            <div className="course-header">
-              {editingCourseId === course.id ? (
-                <div className="edit-course-name">
-                  <input
-                    type="text"
-                    className="course-name-input"
-                    value={editingCourseName}
-                    onChange={(e) => {
-                      if (e.target instanceof HTMLInputElement) {
-                        setEditingCourseName(e.target.value);
-                      }
-                    }}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
-                        handleUpdateCourse(course.id, editingCourseName);
-                      }
-                    }}
-                    onBlur={() => {
-                      if (editingCourseName !== course.name) {
-                        handleUpdateCourse(course.id, editingCourseName);
-                      } else {
-                        setEditingCourseId(null);
-                      }
-                    }}
-                    autoFocus
-                  />
-                  <button
-                    type="button"
-                    className="save-btn"
-                    onClick={() => handleUpdateCourse(course.id, editingCourseName)}
-                    disabled={!editingCourseName}
-                  >
-                    Save
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <h2>{course.name}</h2>
-                  <div className="course-actions">
-                    <button
-                      type="button"
-                      className="edit-course-btn"
-                      onClick={() => startEditingCourse(course)}
-                      aria-label="Edit course"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      className="delete-course-btn"
-                      onClick={() => handleDeleteCourse(course.id)}
-                      aria-label="Delete course"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+            <CourseHeader
+              course={course}
+              isEditing={editingCourseId === course.id}
+              editName={editingCourseName}
+              onEditStart={() => startEditingCourse(course)}
+              onEditChange={setEditingCourseName}
+              onEditSave={() => handleUpdateCourse(course.id, editingCourseName)}
+              onDelete={() => handleDeleteCourse(course.id)}
+            />
 
             {course.assignments.length === 0 ? (
-              <div className="empty-assignments">
-              </div>
+              <div className="empty-assignments"></div>
             ) : (
               <ul>
                 {course.assignments.map((assignment: Assignment) => (
-                  <li key={assignment.id}>
-                    <div className="assignment-info">
-                      <input
-                        type="text"
-                        className="name-input"
-                        value={assignment.name}
-                        onBlur={(e) => {
-                          if (e.target instanceof HTMLInputElement && e.target.value !== assignment.name) {
-                            handleUpdateAssignment(assignment.id, 'name', e.target.value);
-                          }
-                        }}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
-                            e.target.blur();
-                          }
-                        }}
-                      />
-                      <div className="weight-container">
-                        <input
-                          type="number"
-                          className="weight-input"
-                          value={assignment.weight}
-                          min="0"
-                          max="100"
-                          onBlur={(e) => {
-                            if (e.target instanceof HTMLInputElement && parseFloat(e.target.value) !== assignment.weight) {
-                              handleUpdateAssignment(assignment.id, 'weight', e.target.value);
-                            }
-                          }}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
-                              e.target.blur();
-                            }
-                          }}
-                        />
-                        <span className="weight-symbol">%</span>
-                      </div>
-                    </div>
-                    <div className="assignment-grade">
-                      <input
-                        type="number"
-                        className="grade-input"
-                        value={assignment.grade}
-                        onBlur={(e) => {
-                          if (e.target instanceof HTMLInputElement && parseFloat(e.target.value) !== assignment.grade) {
-                            handleUpdateAssignment(assignment.id, 'grade', e.target.value);
-                          }
-                        }}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
-                            e.target.blur();
-                          }
-                        }}
-                      />
-                      <button
-                        type="button"
-                        className="delete-btn"
-                        onClick={() => handleDeleteAssignment(assignment.id)}
-                        aria-label="Delete assignment"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </li>
+                  <AssignmentItem
+                    key={assignment.id}
+                    assignment={assignment}
+                    onUpdate={handleUpdateAssignment}
+                    onDelete={handleDeleteAssignment}
+                  />
                 ))}
-
               </ul>
             )}
+            
             {/* New Assignment Form */}
             <li className="new-assignment-form">
               {newAssignmentData.courseId === course.id ? (
-                <>
-                  <div className="assignment-info">
-                    <input
-                      type="text"
-                      className="name-input"
-                      placeholder="New assignment name"
-                      value={newAssignmentData.name}
-                      onChange={(e) => {
-                        if (e.target instanceof HTMLInputElement) {
-                          setNewAssignmentData({
-                            ...newAssignmentData,
-                            name: e.target.value
-                          });
-                        }
-                      }}
-                    />
-                    <div className="weight-container">
-                      <input
-                        type="number"
-                        className="weight-input"
-                        placeholder="Weight"
-                        value={newAssignmentData.weight}
-                        min="0"
-                        max="100"
-                        onChange={(e) => {
-                          if (e.target instanceof HTMLInputElement) {
-                            setNewAssignmentData({
-                              ...newAssignmentData,
-                              weight: parseFloat(e.target.value) || 0
-                            });
-                          }
-                        }}
-                      />
-                      <span className="weight-symbol">%</span>
-                    </div>
-                  </div>
-                  <div className="assignment-grade">
-                    <input
-                      type="number"
-                      className="grade-input"
-                      placeholder="Grade"
-                      value={newAssignmentData.grade}
-                      onChange={(e) => {
-                        if (e.target instanceof HTMLInputElement) {
-                          setNewAssignmentData({
-                            ...newAssignmentData,
-                            grade: parseFloat(e.target.value) || 0
-                          });
-                        }
-                      }}
-                    />
-                    <div className="assignment-actions">
-                      <button
-                        type="button"
-                        className="add-btn"
-                        onClick={() => handleCreateAssignment(course.id)}
-                        disabled={!newAssignmentData.name}
-                      >
-                        Add
-                      </button>
-                      <button
-                        type="button"
-                        className="cancel-btn"
-                        onClick={() => setNewAssignmentData({
-                          name: "",
-                          grade: 0,
-                          weight: 0,
-                          courseId: null
-                        })}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </>
+                <AssignmentForm
+                  data={newAssignmentData}
+                  onSubmit={() => handleCreateAssignment(course.id)}
+                  onCancel={() => setNewAssignmentData({...initialAssignmentData})}
+                />
               ) : (
                 <button
                   type="button"
@@ -469,7 +208,6 @@ export function App() {
                 </button>
               )}
             </li>
-
           </div>
         ))
       )}

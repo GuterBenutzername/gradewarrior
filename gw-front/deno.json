@@ -21,5 +21,10 @@
     "graphql": "npm:graphql@^16.10.0",
     "preact": "npm:preact@^10.26.2",
     "vite": "npm:vite@^6.1.1"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended", "jsx", "react"]
+    }
   }
 }

@@ -4,7 +4,6 @@ import { App } from "./app.tsx";
 import {
   ApolloClient,
   ApolloProvider,
-  gql,
   InMemoryCache,
 } from "@apollo/client";
 
