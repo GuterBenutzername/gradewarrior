@@ -48,7 +48,7 @@ export function NewCourseForm({
   
   return (
     <div class={courseStyles["course-container"]}>
-      <span class={courseStyles["course-header"]}>
+      <span class={courseStyles["course-title-row"]}>
         <input
           type="text"
           class={courseStyles["course-name-input"]}

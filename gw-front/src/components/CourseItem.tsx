@@ -53,25 +53,37 @@ export function CourseItem({
       class={styles["course-container"]}
       data-course-id={course.id}
     >
-      <span class={styles["course-header"]}>
-        <input
-          type="text"
-          class={styles["course-name-input"]}
-          value={course.name}
-          onChange={(e) =>
-            onCourseChange(
-              course.id,
-              (e.target as HTMLInputElement).value,
-            )}
-        />
-        <button
-          onClick={() => onDeleteCourse(course.id)}
-          type="button"
-          class={styles["delete-course"]}
-        >
-          delete course
-        </button>
-      </span>
+      <div class={styles["course-header-container"]}>
+        <div class={styles["course-title-row"]}>
+          <input
+            type="text"
+            class={styles["course-name-input"]}
+            value={course.name}
+            onChange={(e) =>
+              onCourseChange(
+                course.id,
+                (e.target as HTMLInputElement).value,
+              )}
+          />
+          <button
+            onClick={() => onDeleteCourse(course.id)}
+            type="button"
+            class={styles["delete-course"]}
+          >
+            delete course
+          </button>
+        </div>
+        <div class={styles["averages-container"]}>
+          <div class={styles["average-box"]}>
+            <span class={styles["average-label"]}>Current</span>
+            <span class={styles["average-value"]}>--%</span>
+          </div>
+          <div class={styles["average-box"]}>
+            <span class={styles["average-label"]}>Projected</span>
+            <span class={styles["average-value"]}>--%</span>
+          </div>
+        </div>
+      </div>
       <ul class={styles["assignment-list"]}>
         {course.assignments.map((assignment) => (
           <AssignmentItem
