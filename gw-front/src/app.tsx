@@ -5,43 +5,66 @@ import { useState } from "preact/hooks";
 import { MUTATIONS, QUERIES } from "./graphql/index.ts";
 
 export function App() {
-  // State for new assignment form
+  // State for new assignment form - tracking each course separately
   const [newAssignmentData, setNewAssignmentData] = useState<{
-    courseId: string | null;
-    name: string;
-    grade: number;
-    weight: number;
-  }>({
-    courseId: null,
-    name: "",
-    grade: 0,
-    weight: 0,
-  });
-  
+    [courseId: string]: {
+      name: string;
+      grade: number;
+      weight: number;
+    };
+  }>({});
+
   // Queries
   const { loading, error, data, refetch } = useQuery(QUERIES.GET_COURSES);
 
   // Mutations
-  const [_createCourse] = useMutation(MUTATIONS.CREATE_COURSE);
+  const [createCourse] = useMutation(MUTATIONS.CREATE_COURSE, {
+    onCompleted: (data) => {
+      refetch();
+      // Focus the new course's text field after refetch and render
+      setTimeout(() => {
+        const newCourseElement = document.querySelector(
+          `[data-course-id="${data.createCourse.id}"]`,
+        );
+        if (newCourseElement) {
+          const inputElement = newCourseElement.querySelector(
+            ".course-name-input",
+          ) as HTMLInputElement;
+          if (inputElement) {
+            inputElement.focus();
+            inputElement.setSelectionRange(
+              inputElement.value.length,
+              inputElement.value.length,
+            );
+          }
+        }
+      }, 50);
+      return data.createCourse;
+    },
+  });
   const [updateCourse] = useMutation(MUTATIONS.UPDATE_COURSE, {
     onCompleted: () => refetch(),
   });
-  const [_deleteCourse] = useMutation(MUTATIONS.DELETE_COURSE);
+  const [deleteCourse] = useMutation(MUTATIONS.DELETE_COURSE, {
+    onCompleted: () => refetch(),
+  });
   const [createAssignment] = useMutation(MUTATIONS.CREATE_ASSIGNMENT, {
-    onCompleted: () => {
+    onCompleted: (data) => {
       refetch();
+      // Clear only the specific course's new assignment data
+      const courseId = data.createAssignment.courseId;
       setNewAssignmentData({
-        courseId: null,
-        name: "",
-        grade: 0,
-        weight: 0,
+        ...newAssignmentData,
+        [courseId]: { name: "", grade: 0, weight: 0 },
       });
     },
   });
   const [updateAssignment] = useMutation(MUTATIONS.UPDATE_ASSIGNMENT, {
     onCompleted: () => refetch(),
   });
-  const [_deleteAssignment] = useMutation(MUTATIONS.DELETE_ASSIGNMENT);
+  const [deleteAssignment] = useMutation(MUTATIONS.DELETE_ASSIGNMENT, {
+    onCompleted: () => refetch(),
+  });
 
   // Loading and error states
   if (loading) return <p>Loading...</p>;
@@ -67,7 +90,7 @@ export function App() {
       grade?: number;
       weight?: number;
     } = { id: assignmentId };
-    
+
     if (field === "name") {
       variables.name = value as string;
     } else if (field === "grade" || field === "weight") {
@@ -76,24 +99,38 @@ export function App() {
 
     updateAssignment({ variables });
   };
-  
+
   const handleAddAssignment = (courseId: string) => {
-    if (!newAssignmentData.name) return;
-    
+    const courseData = newAssignmentData[courseId];
+    if (!courseData || !courseData.name) return;
+
     createAssignment({
       variables: {
-        name: newAssignmentData.name,
-        grade: newAssignmentData.grade,
-        weight: newAssignmentData.weight,
+        name: courseData.name,
+        grade: courseData.grade,
+        weight: courseData.weight,
         courseId: courseId,
       },
     });
   };
-  
-  const handleNewAssignmentChange = (field: string, value: string | number) => {
+
+  const handleNewAssignmentChange = (
+    courseId: string,
+    field: string,
+    value: string | number,
+  ) => {
+    // Initialize course data if it doesn't exist
+    const courseData = newAssignmentData[courseId] ||
+      { name: "", grade: 0, weight: 0 };
+
     setNewAssignmentData({
       ...newAssignmentData,
-      [field]: field === "grade" || field === "weight" ? parseFloat(value as string) || 0 : value,
+      [courseId]: {
+        ...courseData,
+        [field]: field === "grade" || field === "weight"
+          ? parseFloat(value as string) || 0
+          : value,
+      },
     });
   };
 
@@ -101,21 +138,53 @@ export function App() {
     <div class="courses">
       {data.courses.map((course: Course) => {
         return (
-          <div key={course.id} class="course-container">
-            <input
-              type="text"
-              class="course-name-input"
-              value={course.name}
-              onChange={(e) =>
-                handleCourseChange(
-                  course.id,
-                  (e.target as HTMLInputElement).value,
-                )}
-            />
+          <div
+            key={course.id}
+            class="course-container"
+            data-course-id={course.id}
+          >
+            <span class="course-header">
+              <input
+                type="text"
+                class="course-name-input"
+                value={course.name}
+                onChange={(e) =>
+                  handleCourseChange(
+                    course.id,
+                    (e.target as HTMLInputElement).value,
+                  )}
+              />
+              <button
+                onClick={() => {
+                  deleteCourse({
+                    variables: {
+                      id: course.id,
+                    },
+                  });
+                }}
+                type="button"
+                class="delete-course"
+              >
+                delete course
+              </button>
+            </span>
             <ul class="assignment-list">
               {course.assignments.map((assignment: Assignment) => {
                 return (
                   <li class="assignment-container" key={assignment.id}>
+                    <button
+                      type="button"
+                      class="delete-button"
+                      onClick={() => {
+                        deleteAssignment({
+                          variables: {
+                            id: assignment.id,
+                          },
+                        });
+                      }}
+                    >
+                      X
+                    </button>
                     <input
                       type="text"
                       class="assignment-name-input"
@@ -127,6 +196,7 @@ export function App() {
                           (e.target as HTMLInputElement).value,
                         )}
                     />
+
                     <input
                       type="number"
                       class="assignment-grade-input"
@@ -152,16 +222,17 @@ export function App() {
                   </li>
                 );
               })}
-              
+
               {/* Add new assignment form */}
               <li class="new-assignment-form">
                 <input
                   type="text"
                   class="assignment-name-input"
                   placeholder="New assignment name"
-                  value={newAssignmentData.name}
+                  value={newAssignmentData[course.id]?.name || ""}
                   onChange={(e) =>
                     handleNewAssignmentChange(
+                      course.id,
                       "name",
                       (e.target as HTMLInputElement).value,
                     )}
@@ -170,9 +241,10 @@ export function App() {
                   type="number"
                   class="assignment-grade-input"
                   placeholder="Grade"
-                  value={newAssignmentData.grade}
+                  value={newAssignmentData[course.id]?.grade || 0}
                   onChange={(e) =>
                     handleNewAssignmentChange(
+                      course.id,
                       "grade",
                       (e.target as HTMLInputElement).value,
                     )}
@@ -181,14 +253,15 @@ export function App() {
                   type="number"
                   class="assignment-weight-input"
                   placeholder="Weight"
-                  value={newAssignmentData.weight}
+                  value={newAssignmentData[course.id]?.weight || 0}
                   onChange={(e) =>
                     handleNewAssignmentChange(
+                      course.id,
                       "weight",
                       (e.target as HTMLInputElement).value,
                     )}
                 />
-                <button 
+                <button
                   type="button"
                   class="add-assignment-button"
                   onClick={() => handleAddAssignment(course.id)}
@@ -200,6 +273,96 @@ export function App() {
           </div>
         );
       })}
+      <div class="course-container">
+        <input
+          type="text"
+          class="course-name-input"
+          value=""
+          placeholder="New course name"
+          onChange={(e) => {
+            const input = e.target as HTMLInputElement;
+            const courseName = input.value || "New Course";
+            input.value = ""; // Clear the input field
+            createCourse({
+              variables: {
+                name: courseName,
+              },
+            });
+          }}
+        />
+        <ul class="assignment-list">
+          <li class="new-assignment-form">
+            <input
+              type="text"
+              class="assignment-name-input"
+              placeholder="New assignment name"
+              value={newAssignmentData["new"]?.name || ""}
+              onChange={(e) =>
+                handleNewAssignmentChange(
+                  "new",
+                  "name",
+                  (e.target as HTMLInputElement).value,
+                )}
+            />
+            <input
+              type="number"
+              class="assignment-grade-input"
+              placeholder="Grade"
+              value={newAssignmentData["new"]?.grade || 0}
+              onChange={(e) =>
+                handleNewAssignmentChange(
+                  "new",
+                  "grade",
+                  (e.target as HTMLInputElement).value,
+                )}
+            />
+            <input
+              type="number"
+              class="assignment-weight-input"
+              placeholder="Weight"
+              value={newAssignmentData["new"]?.weight || 0}
+              onChange={(e) =>
+                handleNewAssignmentChange(
+                  "new",
+                  "weight",
+                  (e.target as HTMLInputElement).value,
+                )}
+            />
+            <button
+              type="button"
+              class="add-assignment-button"
+              onClick={() => {
+                const newAssignmentForm = newAssignmentData["new"];
+                if (!newAssignmentForm || !newAssignmentForm.name) return;
+
+                createCourse({
+                  variables: {
+                    name: "New Course",
+                  },
+                }).then((result) => {
+                  const newCourseId = result.data.createCourse.id;
+                  createAssignment({
+                    variables: {
+                      name: newAssignmentForm.name,
+                      grade: newAssignmentForm.grade,
+                      weight: newAssignmentForm.weight,
+                      courseId: newCourseId,
+                    },
+                  });
+
+                  // Clear the new assignment form
+                  setNewAssignmentData({
+                    ...newAssignmentData,
+                    "new": { name: "", grade: 0, weight: 0 },
+                  });
+                });
+              }}
+            >
+              Add
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 }

@@ -145,3 +145,44 @@ input:focus {
   color: var(--nord3);
   opacity: 0.7;
 }
+
+.delete-button {
+  border: none;
+  padding: 0.25rem 0.25rem;
+  cursor: pointer;
+  color: var(--nord3);
+  transition: all 0.1s ease;
+  background-color: transparent;
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: .25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--nord4);
+
+}
+
+.delete-button:hover {
+  color: var(--nord11);
+  border: 2px solid var(--nord4)
+}
+
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.delete-course {
+  border-radius: 8px;
+  border: none;
+  background-color: var(--nord6);
+  transition: all 0.2s ease; 
+}
+
+.delete-course:hover {
+  background-color: var(--nord11);
+  color: var(--nord6);
+}
