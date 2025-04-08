@@ -25,33 +25,6 @@ class DatabaseProvider(ABC):
 
     @abstractmethod
     def init_db(self) -> None:
-        pass
-
-
-class SQLiteProvider(DatabaseProvider):
-    def __init__(self, db_path: str) -> None:
-        self.db_path = db_path
-
-    def get_connection(self):
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
-
-    def execute_query(self, query: str, params: tuple = ()) -> list[dict]:
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(query, params)
-            return [dict(row) for row in cursor.fetchall()]
-
-    def execute_command(self, command: str, params: tuple = ()) -> int:
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(command, params)
-            last_id = cursor.lastrowid
-            conn.commit()
-            return last_id
-
-    def init_db(self) -> None:
         with self.get_connection() as conn:
             cursor = conn.cursor()
 
@@ -88,6 +61,30 @@ class SQLiteProvider(DatabaseProvider):
             conn.commit()
 
 
+class SQLiteProvider(DatabaseProvider):
+    def __init__(self, db_path: str) -> None:
+        self.db_path = db_path
+
+    def get_connection(self):
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    def execute_query(self, query: str, params: tuple = ()) -> list[dict]:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(query, params)
+            return [dict(row) for row in cursor.fetchall()]
+
+    def execute_command(self, command: str, params: tuple = ()) -> int:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(command, params)
+            last_id = cursor.lastrowid
+            conn.commit()
+            return last_id
+
+
 class PostgresProvider(DatabaseProvider):
     def __init__(self, connection_string: str) -> None:
         self.connection_string = connection_string
@@ -121,40 +118,6 @@ class PostgresProvider(DatabaseProvider):
             conn.commit()
             return last_id
 
-    def init_db(self) -> None:
-        with self.get_connection() as conn, conn.cursor() as cursor:
-            tables = [
-                """
-                    CREATE TABLE IF NOT EXISTS users (
-                        id SERIAL PRIMARY KEY,
-                        name TEXT NOT NULL
-                    )
-                    """,
-                """
-                    CREATE TABLE IF NOT EXISTS courses (
-                        id SERIAL PRIMARY KEY,
-                        name TEXT NOT NULL,
-                        user_id INTEGER,
-                        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-                    )
-                    """,
-                """
-                    CREATE TABLE IF NOT EXISTS assignments (
-                        id SERIAL PRIMARY KEY,
-                        name TEXT NOT NULL,
-                        grade REAL NOT NULL,
-                        weight REAL NOT NULL,
-                        course_id INTEGER,
-                        FOREIGN KEY (course_id) REFERENCES courses (id) ON DELETE CASCADE
-                    )
-                    """,
-            ]
-
-            for table_sql in tables:
-                cursor.execute(table_sql)
-
-            conn.commit()
-
 
 # Create a database provider based on configuration
 def create_db_provider() -> DatabaseProvider:
@@ -170,9 +133,7 @@ def create_db_provider() -> DatabaseProvider:
         user = os.environ.get("DB_USER", "postgres")
         password = os.environ.get("DB_PASSWORD", "")
 
-        connection_string = (
-            f"host={host} port={port} dbname={name} user={user} password={password}"
-        )
+        connection_string = f"host={host} port={port} dbname={name} user={user} password={password}"
         return PostgresProvider(connection_string)
 
     msg = f"Unsupported database type: {db_type}"
