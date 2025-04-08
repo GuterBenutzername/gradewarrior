@@ -3,6 +3,7 @@ import { AssignmentItem } from "./AssignmentItem.tsx";
 import { NewAssignmentForm } from "./NewAssignmentForm.tsx";
 import { useState } from "preact/hooks";
 import styles from "./CourseItem.module.css";
+import { gradeCalc } from "../utils/gradeCalc.ts";
 
 interface CourseItemProps {
   course: Course;
@@ -76,11 +77,11 @@ export function CourseItem({
         <div class={styles["averages-container"]}>
           <div class={styles["average-box"]}>
             <span class={styles["average-label"]}>Current</span>
-            <span class={styles["average-value"]}>--%</span>
+            <span class={styles["average-value"]}>{gradeCalc(course.assignments)}%</span>
           </div>
           <div class={styles["average-box"]}>
             <span class={styles["average-label"]}>Projected</span>
-            <span class={styles["average-value"]}>--%</span>
+            <span class={styles["average-value"]}>{gradeCalc(course.assignments)}%</span>
           </div>
         </div>
       </div>
