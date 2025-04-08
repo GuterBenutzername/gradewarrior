@@ -8,7 +8,14 @@
   width: 100%;
 }
 
-.course-header {
+.course-header-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.course-title-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -26,6 +33,7 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 0;
+  margin: 0;
 }
 
 .delete-course {
@@ -40,4 +48,72 @@
 .delete-course:hover {
   background-color: var(--nord11);
   color: var(--nord6);
+}
+
+.averages-container {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.average-box {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--nord6);
+  border-radius: 8px;
+  padding: 0.5rem;
+  min-width: 80px;
+  text-align: center;
+}
+
+.average-label {
+  font-size: 0.75rem;
+  color: var(--nord3);
+  margin-bottom: 0.25rem;
+}
+
+.average-value {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--nord0);
+}
+
+.assignments-container {
+  background-color: var(--nord5);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.assignments-header {
+  display: flex;
+  margin: 0;
+  padding: 0.5rem;
+  gap: 0.5rem;
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: var(--nord3);
+  background-color: var(--nord5);
+  border-bottom: 1px solid var(--nord4);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.assignment-name-header {
+  flex: 1;
+  min-width: 150px;
+  padding-left: 8px; /* Add left padding to align with text in textbox */
+}
+
+.assignment-grade-header,
+.assignment-weight-header {
+  width: 5rem;
+  text-align: center;
+}
+
+/* Add space on the right to account for the delete/add button */
+.assignments-header::after {
+  content: "";
+  width: 2rem; /* Matches the width of the delete/add buttons */
+  display: block;
 }

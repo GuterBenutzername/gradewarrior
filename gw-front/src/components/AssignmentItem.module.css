@@ -3,9 +3,20 @@
   padding: 0.5rem;
   gap: 0.5rem;
   background-color: var(--nord5);
-  border-radius: 16px;
   width: 100%;
   list-style: none;
+  border-bottom: 1px solid var(--nord4);
+}
+
+.first-item {
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.last-item {
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  border-bottom: none;
 }
 
 .assignment-name-input {
@@ -15,7 +26,7 @@
 
 .assignment-grade-input,
 .assignment-weight-input {
-  width: 60px;
+  width: 5rem;
   text-align: center;
   background-color: #8fbcbb1a;
 }
@@ -35,9 +46,11 @@
   align-items: center;
   justify-content: center;
   border: 1px solid var(--nord4);
+  font-weight: bold;
+  font-size: 1rem;
 }
 
 .delete-button:hover {
   color: var(--nord11);
-  border: 2px solid var(--nord4)
+  scale: 1.1;
 }

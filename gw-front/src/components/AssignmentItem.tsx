@@ -3,20 +3,29 @@ import styles from "./AssignmentItem.module.css";
 
 interface AssignmentItemProps {
   assignment: Assignment;
-  onAssignmentChange: (id: string, field: string, value: string | number) => void;
+  onAssignmentChange: (
+    id: string,
+    field: string,
+    value: string | number,
+  ) => void;
   onDeleteAssignment: (id: string) => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
-export function AssignmentItem({ assignment, onAssignmentChange, onDeleteAssignment }: AssignmentItemProps) {
+export function AssignmentItem({
+  assignment,
+  onAssignmentChange,
+  onDeleteAssignment,
+  isFirst = false,
+  isLast = false,
+}: AssignmentItemProps) {
+  const containerClass = `${styles["assignment-container"]} ${
+    isFirst ? styles["first-item"] : ""
+  } ${isLast ? styles["last-item"] : ""}`;
+
   return (
-    <li class={styles["assignment-container"]} key={assignment.id}>
-      <button
-        type="button"
-        class={styles["delete-button"]}
-        onClick={() => onDeleteAssignment(assignment.id)}
-      >
-        X
-      </button>
+    <li class={containerClass} key={assignment.id}>
       <input
         type="text"
         class={styles["assignment-name-input"]}
@@ -51,6 +60,14 @@ export function AssignmentItem({ assignment, onAssignmentChange, onDeleteAssignm
             (e.target as HTMLInputElement).value,
           )}
       />
+      <button
+        type="button"
+        class={styles["delete-button"]}
+        onClick={() => onDeleteAssignment(assignment.id)}
+        title="Delete assignment"
+      >
+        ✕
+      </button>
     </li>
   );
 }

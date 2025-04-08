@@ -3,6 +3,7 @@ import { AssignmentItem } from "./AssignmentItem.tsx";
 import { NewAssignmentForm } from "./NewAssignmentForm.tsx";
 import { useState } from "preact/hooks";
 import styles from "./CourseItem.module.css";
+import { gradeCalc } from "../utils/gradeCalc.ts";
 
 interface CourseItemProps {
   course: Course;
@@ -53,43 +54,64 @@ export function CourseItem({
       class={styles["course-container"]}
       data-course-id={course.id}
     >
-      <span class={styles["course-header"]}>
-        <input
-          type="text"
-          class={styles["course-name-input"]}
-          value={course.name}
-          onChange={(e) =>
-            onCourseChange(
-              course.id,
-              (e.target as HTMLInputElement).value,
-            )}
-        />
-        <button
-          onClick={() => onDeleteCourse(course.id)}
-          type="button"
-          class={styles["delete-course"]}
-        >
-          delete course
-        </button>
-      </span>
-      <ul class={styles["assignment-list"]}>
-        {course.assignments.map((assignment) => (
-          <AssignmentItem
-            key={assignment.id}
-            assignment={assignment}
-            onAssignmentChange={onAssignmentChange}
-            onDeleteAssignment={onDeleteAssignment}
+      <div class={styles["course-header-container"]}>
+        <div class={styles["course-title-row"]}>
+          <input
+            type="text"
+            class={styles["course-name-input"]}
+            value={course.name}
+            onChange={(e) =>
+              onCourseChange(
+                course.id,
+                (e.target as HTMLInputElement).value,
+              )}
           />
-        ))}
+          <button
+            onClick={() => onDeleteCourse(course.id)}
+            type="button"
+            class={styles["delete-course"]}
+          >
+            delete course
+          </button>
+        </div>
+        <div class={styles["averages-container"]}>
+          <div class={styles["average-box"]}>
+            <span class={styles["average-label"]}>Current</span>
+            <span class={styles["average-value"]}>{gradeCalc(course.assignments).toFixed(2)}%</span>
+          </div>
+          <div class={styles["average-box"]}>
+            <span class={styles["average-label"]}>Projected</span>
+            <span class={styles["average-value"]}>{gradeCalc(course.assignments).toFixed(2)}%</span>
+          </div>
+        </div>
+      </div>
+      <div class={styles["assignments-container"]}>
+        <div class={styles["assignments-header"]}>
+          <div class={styles["assignment-name-header"]}>Assignment Name</div>
+          <div class={styles["assignment-grade-header"]}>Grade (%)</div>
+          <div class={styles["assignment-weight-header"]}>Weight (%)</div>
+        </div>
+        <ul class={styles["assignment-list"]}>
+          {course.assignments.map((assignment, index) => (
+            <AssignmentItem
+              key={assignment.id}
+              assignment={assignment}
+              onAssignmentChange={onAssignmentChange}
+              onDeleteAssignment={onDeleteAssignment}
+              isFirst={index === 0}
+            />
+          ))}
 
-        {/* Add new assignment form */}
-        <NewAssignmentForm
-          courseId={course.id}
-          formData={newAssignmentData}
-          onNewAssignmentChange={handleNewAssignmentChange}
-          onAddAssignment={handleAddAssignment}
-        />
-      </ul>
+          {/* Add new assignment form */}
+          <NewAssignmentForm
+            courseId={course.id}
+            formData={newAssignmentData}
+            onNewAssignmentChange={handleNewAssignmentChange}
+            onAddAssignment={handleAddAssignment}
+            isLast
+          />
+        </ul>
+      </div>
     </div>
   );
 }
