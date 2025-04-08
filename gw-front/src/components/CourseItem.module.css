@@ -40,7 +40,7 @@
   border-radius: 8px;
   border: none;
   background-color: var(--nord6);
-  transition: all 0.2s ease; 
+  transition: all 0.2s ease;
   padding: 0.25rem 0.5rem;
   cursor: pointer;
 }

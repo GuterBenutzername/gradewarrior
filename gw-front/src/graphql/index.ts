@@ -14,7 +14,7 @@ export const QUERIES = {
         }
       }
     }
-  `
+  `,
 };
 
 export const MUTATIONS = {
@@ -63,5 +63,5 @@ export const MUTATIONS = {
     mutation DeleteAssignment($id: ID!) {
       deleteAssignment(id: $id)
     }
-  `
+  `,
 };

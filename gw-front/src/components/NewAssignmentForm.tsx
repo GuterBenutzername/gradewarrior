@@ -1,9 +1,14 @@
 import styles from "./NewAssignmentForm.module.css";
+import { useTranslation } from "preact-i18next";
 
 interface NewAssignmentFormProps {
   courseId: string;
   formData?: { name: string; grade: number; weight: number };
-  onNewAssignmentChange: (courseId: string, field: string, value: string | number) => void;
+  onNewAssignmentChange: (
+    courseId: string,
+    field: string,
+    value: string | number,
+  ) => void;
   onAddAssignment: (courseId: string) => void;
   isLast?: boolean;
 }
@@ -13,17 +18,20 @@ export function NewAssignmentForm({
   formData = { name: "", grade: 0, weight: 0 },
   onNewAssignmentChange,
   onAddAssignment,
-  isLast = false
+  isLast = false,
 }: NewAssignmentFormProps) {
+  const { t } = useTranslation();
   // Determine container class based on position
-  const formClass = `${styles["new-assignment-form"]} ${isLast ? styles["last-item"] : ""}`;
-  
+  const formClass = `${styles["new-assignment-form"]} ${
+    isLast ? styles["last-item"] : ""
+  }`;
+
   return (
     <li class={formClass}>
       <input
         type="text"
         class={styles["assignment-name-input"]}
-        placeholder="New assignment name"
+        placeholder={t("assignment.newAssignmentName")}
         value={formData.name}
         onChange={(e) =>
           onNewAssignmentChange(
@@ -35,7 +43,7 @@ export function NewAssignmentForm({
       <input
         type="number"
         class={styles["assignment-grade-input"]}
-        placeholder="Grade"
+        placeholder={t("assignment.grade")}
         value={formData.grade}
         onChange={(e) =>
           onNewAssignmentChange(
@@ -47,7 +55,7 @@ export function NewAssignmentForm({
       <input
         type="number"
         class={styles["assignment-weight-input"]}
-        placeholder="Weight"
+        placeholder={t("assignment.weight")}
         value={formData.weight}
         onChange={(e) =>
           onNewAssignmentChange(
@@ -60,7 +68,7 @@ export function NewAssignmentForm({
         type="button"
         class={styles["add-button"]}
         onClick={() => onAddAssignment(courseId)}
-        title="Add assignment"
+        title={t("assignment.addAssignment")}
       >
         +
       </button>

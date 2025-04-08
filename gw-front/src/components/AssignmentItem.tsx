@@ -1,5 +1,6 @@
 import { Assignment } from "../types.ts";
 import styles from "./AssignmentItem.module.css";
+import { useTranslation } from "preact-i18next";
 
 interface AssignmentItemProps {
   assignment: Assignment;
@@ -20,6 +21,7 @@ export function AssignmentItem({
   isFirst = false,
   isLast = false,
 }: AssignmentItemProps) {
+  const { t } = useTranslation();
   const containerClass = `${styles["assignment-container"]} ${
     isFirst ? styles["first-item"] : ""
   } ${isLast ? styles["last-item"] : ""}`;
@@ -64,7 +66,7 @@ export function AssignmentItem({
         type="button"
         class={styles["delete-button"]}
         onClick={() => onDeleteAssignment(assignment.id)}
-        title="Delete assignment"
+        title={t("assignment.deleteAssignment")}
       >
         ✕
       </button>

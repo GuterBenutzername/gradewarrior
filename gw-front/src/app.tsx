@@ -4,10 +4,12 @@ import { Course } from "./types.ts";
 import { MUTATIONS, QUERIES } from "./graphql/index.ts";
 import { CourseItem } from "./components/CourseItem.tsx";
 import { useState } from "preact/hooks";
+import { useTranslation } from "preact-i18next";
 
 export function App() {
+  const { t } = useTranslation();
   const [isAddingCourse, setIsAddingCourse] = useState(false);
-  const [newCourseName, setNewCourseName] = useState("New Course");
+  const [newCourseName, setNewCourseName] = useState("");
 
   // Queries
   const { loading, error, data, refetch } = useQuery(QUERIES.GET_COURSES);
@@ -38,8 +40,8 @@ export function App() {
   });
 
   // Loading and error states
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error :(</p>;
+  if (loading) return <p>{t("app.loading")}</p>;
+  if (error) return <p>{t("app.error")}</p>;
 
   const handleCourseChange = (courseId: string, value: string) => {
     updateCourse({
@@ -115,7 +117,7 @@ export function App() {
   const handleAddCourse = () => {
     handleCreateCourse(newCourseName);
     setIsAddingCourse(false);
-    setNewCourseName("New Course");
+    setNewCourseName(t("course.newCourse"));
   };
 
   return (
@@ -131,30 +133,45 @@ export function App() {
           onAddAssignment={handleAddAssignment}
         />
       ))}
-      
-      {isAddingCourse ? (
-        <div class="add-course-form">
-          <input
-            type="text"
-            value={newCourseName}
-            onChange={(e) => setNewCourseName((e.target as HTMLInputElement).value)}
-            placeholder="Course name"
-            autoFocus
-          />
-          <div class="add-course-actions">
-            <button type="button" onClick={handleAddCourse} class="add-button">Add Course</button>
-            <button type="button" onClick={() => setIsAddingCourse(false)} class="cancel-button">Cancel</button>
+
+      {isAddingCourse
+        ? (
+          <div class="add-course-form">
+            <input
+              type="text"
+              value={newCourseName}
+              onChange={(e) =>
+                setNewCourseName((e.target as HTMLInputElement).value)}
+              placeholder={t("course.courseName")}
+              autoFocus
+            />
+            <div class="add-course-actions">
+              <button
+                type="button"
+                onClick={handleAddCourse}
+                class="add-button"
+              >
+                {t("course.addCourse")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAddingCourse(false)}
+                class="cancel-button"
+              >
+                {t("course.cancel")}
+              </button>
+            </div>
           </div>
-        </div>
-      ) : (
-        <button 
-          type="button"
-          class="add-course-button"
-          onClick={() => setIsAddingCourse(true)}
-        >
-          + Add Course
-        </button>
-      )}
+        )
+        : (
+          <button
+            type="button"
+            class="add-course-button"
+            onClick={() => setIsAddingCourse(true)}
+          >
+            {t("course.addCourseButton")}
+          </button>
+        )}
     </div>
   );
 }

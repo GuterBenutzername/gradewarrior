@@ -1,0 +1,26 @@
+{
+  "app": {
+    "loading": "Loading...",
+    "error": "Error :("
+  },
+  "course": {
+    "newCourse": "new course",
+    "courseName": "course name",
+    "addCourse": "add course",
+    "cancel": "cancel",
+    "addCourseButton": "+ add course",
+    "deleteCourse": "delete course",
+    "current": "current",
+    "projected": "projected",
+    "assignmentName": "assignment name",
+    "grade": "grade (%)",
+    "weight": "weight (%)"
+  },
+  "assignment": {
+    "deleteAssignment": "delete assignment",
+    "addAssignment": "add assignment",
+    "newAssignmentName": "new assignment name",
+    "grade": "grade",
+    "weight": "weight"
+  }
+}
