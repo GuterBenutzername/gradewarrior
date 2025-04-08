@@ -10,6 +10,7 @@
     "npm:global-jsdom@26": "26.0.0_jsdom@26.0.0",
     "npm:graphql@^16.10.0": "16.10.0",
     "npm:jsdom@26": "26.0.0",
+    "npm:nord@~0.2.1": "0.2.1",
     "npm:preact@^10.26.2": "10.26.4",
     "npm:prettier@^3.5.3": "3.5.3",
     "npm:vite@*": "6.2.2_@types+node@22.12.0",
@@ -1260,6 +1261,9 @@
     "node-releases@2.0.19": {
       "integrity": "sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw=="
     },
+    "nord@0.2.1": {
+      "integrity": "sha512-/AD7JGJbcp1pB5XwYkJyivqdeXofUP5u2lkif6vLGLc+SsV9OCC0JFNpVwM5pqHuFqbyojRt6xILuidJOwwJDQ=="
+    },
     "nth-check@2.1.1": {
       "integrity": "sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==",
       "dependencies": [
@@ -1761,6 +1765,7 @@
       "npm:global-jsdom@26",
       "npm:graphql@^16.10.0",
       "npm:jsdom@26",
+      "npm:nord@~0.2.1",
       "npm:preact@^10.26.2",
       "npm:vite@^6.1.1",
       "npm:vitest@^3.1.1"
