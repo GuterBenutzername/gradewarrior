@@ -1,0 +1,43 @@
+.course-container {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 0.5rem;
+  background-color: var(--nord4);
+  border-radius: 16px;
+  width: 100%;
+}
+
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.course-name-input {
+  font-weight: bold;
+  font-size: 1.2rem;
+  width: fit-content;
+  min-width: 200px;
+}
+
+.assignment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0;
+}
+
+.delete-course {
+  border-radius: 8px;
+  border: none;
+  background-color: var(--nord6);
+  transition: all 0.2s ease; 
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+}
+
+.delete-course:hover {
+  background-color: var(--nord11);
+  color: var(--nord6);
+}

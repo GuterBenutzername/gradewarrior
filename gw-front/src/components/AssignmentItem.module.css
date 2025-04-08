@@ -1,0 +1,43 @@
+.assignment-container {
+  display: flex;
+  padding: 0.5rem;
+  gap: 0.5rem;
+  background-color: var(--nord5);
+  border-radius: 16px;
+  width: 100%;
+  list-style: none;
+}
+
+.assignment-name-input {
+  flex: 1;
+  min-width: 150px;
+}
+
+.assignment-grade-input,
+.assignment-weight-input {
+  width: 60px;
+  text-align: center;
+  background-color: #8fbcbb1a;
+}
+
+.delete-button {
+  border: none;
+  padding: 0.25rem 0.25rem;
+  cursor: pointer;
+  color: var(--nord3);
+  transition: all 0.1s ease;
+  background-color: transparent;
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: .25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--nord4);
+}
+
+.delete-button:hover {
+  color: var(--nord11);
+  border: 2px solid var(--nord4)
+}
