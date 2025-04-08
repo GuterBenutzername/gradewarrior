@@ -84,24 +84,35 @@ export function CourseItem({
           </div>
         </div>
       </div>
-      <ul class={styles["assignment-list"]}>
-        {course.assignments.map((assignment) => (
-          <AssignmentItem
-            key={assignment.id}
-            assignment={assignment}
-            onAssignmentChange={onAssignmentChange}
-            onDeleteAssignment={onDeleteAssignment}
-          />
-        ))}
+      <div class={styles["assignments-container"]}>
+        <div class={styles["assignments-header"]}>
+          <div class={styles["delete-button-spacer"]}></div>
+          <div class={styles["assignment-name-header"]}>Assignment Name</div>
+          <div class={styles["assignment-grade-header"]}>Grade (%)</div>
+          <div class={styles["assignment-weight-header"]}>Weight (%)</div>
+        </div>
+        <ul class={styles["assignment-list"]}>
+          {course.assignments.map((assignment, index) => (
+            <AssignmentItem
+              key={assignment.id}
+              assignment={assignment}
+              onAssignmentChange={onAssignmentChange}
+              onDeleteAssignment={onDeleteAssignment}
+              isFirst={index === 0}
+              isLast={index === course.assignments.length - 1 && course.assignments.length > 0}
+            />
+          ))}
 
-        {/* Add new assignment form */}
-        <NewAssignmentForm
-          courseId={course.id}
-          formData={newAssignmentData}
-          onNewAssignmentChange={handleNewAssignmentChange}
-          onAddAssignment={handleAddAssignment}
-        />
-      </ul>
+          {/* Add new assignment form */}
+          <NewAssignmentForm
+            courseId={course.id}
+            formData={newAssignmentData}
+            onNewAssignmentChange={handleNewAssignmentChange}
+            onAddAssignment={handleAddAssignment}
+            isLast={true}
+          />
+        </ul>
+      </div>
     </div>
   );
 }

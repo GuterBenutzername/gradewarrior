@@ -5,11 +5,22 @@ interface AssignmentItemProps {
   assignment: Assignment;
   onAssignmentChange: (id: string, field: string, value: string | number) => void;
   onDeleteAssignment: (id: string) => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
-export function AssignmentItem({ assignment, onAssignmentChange, onDeleteAssignment }: AssignmentItemProps) {
+export function AssignmentItem({ 
+  assignment, 
+  onAssignmentChange, 
+  onDeleteAssignment,
+  isFirst = false,
+  isLast = false
+}: AssignmentItemProps) {
+  // Determine container class based on position
+  const containerClass = `${styles["assignment-container"]} ${isFirst ? styles["first-item"] : ""} ${isLast ? styles["last-item"] : ""}`;
+  
   return (
-    <li class={styles["assignment-container"]} key={assignment.id}>
+    <li class={containerClass} key={assignment.id}>
       <button
         type="button"
         class={styles["delete-button"]}

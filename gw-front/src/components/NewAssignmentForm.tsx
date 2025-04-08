@@ -5,6 +5,7 @@ interface NewAssignmentFormProps {
   formData?: { name: string; grade: number; weight: number };
   onNewAssignmentChange: (courseId: string, field: string, value: string | number) => void;
   onAddAssignment: (courseId: string) => void;
+  isLast?: boolean;
 }
 
 export function NewAssignmentForm({
@@ -12,9 +13,14 @@ export function NewAssignmentForm({
   formData = { name: "", grade: 0, weight: 0 },
   onNewAssignmentChange,
   onAddAssignment,
+  isLast = false
 }: NewAssignmentFormProps) {
+  // Determine container class based on position
+  const formClass = `${styles["new-assignment-form"]} ${isLast ? styles["last-item"] : ""}`;
+  
   return (
-    <li class={styles["new-assignment-form"]}>
+    <li class={formClass}>
+      <div class={styles["delete-button-spacer"]}></div>
       <input
         type="text"
         class={styles["assignment-name-input"]}
