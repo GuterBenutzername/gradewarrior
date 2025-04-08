@@ -86,7 +86,6 @@ export function CourseItem({
       </div>
       <div class={styles["assignments-container"]}>
         <div class={styles["assignments-header"]}>
-          <div class={styles["delete-button-spacer"]}></div>
           <div class={styles["assignment-name-header"]}>Assignment Name</div>
           <div class={styles["assignment-grade-header"]}>Grade (%)</div>
           <div class={styles["assignment-weight-header"]}>Weight (%)</div>
@@ -99,7 +98,6 @@ export function CourseItem({
               onAssignmentChange={onAssignmentChange}
               onDeleteAssignment={onDeleteAssignment}
               isFirst={index === 0}
-              isLast={index === course.assignments.length - 1 && course.assignments.length > 0}
             />
           ))}
 
@@ -109,7 +107,7 @@ export function CourseItem({
             formData={newAssignmentData}
             onNewAssignmentChange={handleNewAssignmentChange}
             onAddAssignment={handleAddAssignment}
-            isLast={true}
+            isLast
           />
         </ul>
       </div>

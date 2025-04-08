@@ -46,9 +46,11 @@
   align-items: center;
   justify-content: center;
   border: 1px solid var(--nord4);
+  font-weight: bold;
+  font-size: 1rem;
 }
 
 .delete-button:hover {
   color: var(--nord11);
-  border: 2px solid var(--nord4)
+  scale: 1.1;
 }

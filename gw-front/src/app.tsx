@@ -3,9 +3,11 @@ import { useMutation, useQuery } from "@apollo/client";
 import { Course } from "./types.ts";
 import { MUTATIONS, QUERIES } from "./graphql/index.ts";
 import { CourseItem } from "./components/CourseItem.tsx";
-import { NewCourseForm } from "./components/NewCourseForm.tsx";
+import { useState } from "preact/hooks";
 
 export function App() {
+  const [isAddingCourse, setIsAddingCourse] = useState(false);
+  const [newCourseName, setNewCourseName] = useState("New Course");
 
   // Queries
   const { loading, error, data, refetch } = useQuery(QUERIES.GET_COURSES);
@@ -132,6 +134,12 @@ export function App() {
     });
   };
 
+  const handleAddCourse = () => {
+    handleCreateCourse(newCourseName);
+    setIsAddingCourse(false);
+    setNewCourseName("New Course");
+  };
+
   return (
     <div class="courses">
       {data.courses.map((course: Course) => (
@@ -145,10 +153,29 @@ export function App() {
           onAddAssignment={handleAddAssignment}
         />
       ))}
-      <NewCourseForm
-        onCreateCourse={handleCreateCourse}
-        onCreateCourseWithAssignment={handleCreateCourseWithAssignment}
-      />
+      
+      {isAddingCourse ? (
+        <div class="add-course-form">
+          <input
+            type="text"
+            value={newCourseName}
+            onChange={(e) => setNewCourseName((e.target as HTMLInputElement).value)}
+            placeholder="Course name"
+            autoFocus
+          />
+          <div class="add-course-actions">
+            <button onClick={handleAddCourse} class="add-button">Add Course</button>
+            <button onClick={() => setIsAddingCourse(false)} class="cancel-button">Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <button 
+          class="add-course-button"
+          onClick={() => setIsAddingCourse(true)}
+        >
+          + Add Course
+        </button>
+      )}
     </div>
   );
 }

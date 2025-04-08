@@ -20,7 +20,6 @@ export function NewAssignmentForm({
   
   return (
     <li class={formClass}>
-      <div class={styles["delete-button-spacer"]}></div>
       <input
         type="text"
         class={styles["assignment-name-input"]}
@@ -59,10 +58,11 @@ export function NewAssignmentForm({
       />
       <button
         type="button"
-        class={styles["add-assignment-button"]}
+        class={styles["add-button"]}
         onClick={() => onAddAssignment(courseId)}
+        title="Add assignment"
       >
-        Add
+        +
       </button>
     </li>
   );
