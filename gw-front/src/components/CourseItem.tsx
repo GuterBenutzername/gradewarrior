@@ -77,11 +77,11 @@ export function CourseItem({
         <div class={styles["averages-container"]}>
           <div class={styles["average-box"]}>
             <span class={styles["average-label"]}>Current</span>
-            <span class={styles["average-value"]}>{gradeCalc(course.assignments)}%</span>
+            <span class={styles["average-value"]}>{gradeCalc(course.assignments).toFixed(2)}%</span>
           </div>
           <div class={styles["average-box"]}>
             <span class={styles["average-label"]}>Projected</span>
-            <span class={styles["average-value"]}>{gradeCalc(course.assignments)}%</span>
+            <span class={styles["average-value"]}>{gradeCalc(course.assignments).toFixed(2)}%</span>
           </div>
         </div>
       </div>
