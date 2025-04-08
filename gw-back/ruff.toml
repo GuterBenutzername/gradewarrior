@@ -1,5 +1,5 @@
 target-version = "py313"
-line-length = 90
+line-length = 120
 [lint]
 select = ["ALL"]
 ignore = ["D", "ANN", "A002", "TRY002", "T201", "S608"]

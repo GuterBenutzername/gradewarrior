@@ -292,7 +292,11 @@ def resolve_delete_user(_, _info, id):
     if not user:
         msg = f"User with ID {user_id} not found"
         raise Exception(msg)
-
+    db.execute_command(
+        "DELETE FROM assignments WHERE course_id IN (SELECT id FROM courses WHERE user_id = ?)",
+        (user_id,),
+    )
+    db.execute_command("DELETE FROM courses WHERE user_id = ?", (user_id,))
     db.execute_command("DELETE FROM users WHERE id = ?", (user_id,))
     return id
 
@@ -329,6 +333,7 @@ def resolve_delete_course(_, _info, id):
         msg = f"Course with ID {course_id} not found"
         raise Exception(msg)
 
+    db.execute_command("DELETE FROM assignments WHERE course_id = ?", (course_id,))
     db.execute_command("DELETE FROM courses WHERE id = ?", (course_id,))
     return id
 
