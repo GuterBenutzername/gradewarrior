@@ -112,28 +112,6 @@ export function App() {
     });
   };
 
-  const handleCreateCourseWithAssignment = (assignmentData: {
-    name: string;
-    grade: number;
-    weight: number;
-  }) => {
-    createCourse({
-      variables: {
-        name: "New Course",
-      },
-    }).then((result) => {
-      const newCourseId = result.data.createCourse.id;
-      createAssignment({
-        variables: {
-          name: assignmentData.name,
-          grade: assignmentData.grade,
-          weight: assignmentData.weight,
-          courseId: newCourseId,
-        },
-      });
-    });
-  };
-
   const handleAddCourse = () => {
     handleCreateCourse(newCourseName);
     setIsAddingCourse(false);
@@ -164,12 +142,13 @@ export function App() {
             autoFocus
           />
           <div class="add-course-actions">
-            <button onClick={handleAddCourse} class="add-button">Add Course</button>
-            <button onClick={() => setIsAddingCourse(false)} class="cancel-button">Cancel</button>
+            <button type="button" onClick={handleAddCourse} class="add-button">Add Course</button>
+            <button type="button" onClick={() => setIsAddingCourse(false)} class="cancel-button">Cancel</button>
           </div>
         </div>
       ) : (
         <button 
+          type="button"
           class="add-course-button"
           onClick={() => setIsAddingCourse(true)}
         >
