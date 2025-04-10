@@ -60,7 +60,8 @@ class PostgresProvider(DatabaseProvider):
                         name TEXT NOT NULL,
                         grade REAL NOT NULL,
                         weight REAL NOT NULL,
-                        course_id INTEGER,
+                        course_id INTEGER NOT NULL,
+                        is_theoretical BOOLEAN NOT NULL DEFAULT FALSE,
                         FOREIGN KEY (course_id) REFERENCES courses (id) ON DELETE CASCADE
                     )
                     """,

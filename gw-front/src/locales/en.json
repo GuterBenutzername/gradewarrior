@@ -14,7 +14,10 @@
     "projected": "projected",
     "assignmentName": "assignment name",
     "grade": "grade (%)",
-    "weight": "weight (%)"
+    "weight": "weight (%)",
+    "realAssignments": "Real Assignments",
+    "theoreticalAssignments": "Theoretical Assignments",
+    "syncWithReal": "Sync with Real"
   },
   "assignment": {
     "deleteAssignment": "delete assignment",

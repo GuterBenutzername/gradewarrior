@@ -86,9 +86,10 @@ def resolve_delete_course(_, _info, id):
 
 @mutation.field("createAssignment")
 def resolve_create_assignment(_, _info, input):
+    is_theoretical = bool(input.get("isTheoretical", False))
     assignment_id = db.execute_command(
-        "INSERT INTO assignments (name, grade, weight, course_id) VALUES (?, ?, ?, ?)",
-        (input["name"], input["grade"], input["weight"], int(input["courseId"])),
+        "INSERT INTO assignments (name, grade, weight, course_id, is_theoretical) VALUES (?, ?, ?, ?, ?)",
+        (input["name"], input["grade"], input["weight"], int(input["courseId"]), is_theoretical),
     )
 
     return {
@@ -96,6 +97,7 @@ def resolve_create_assignment(_, _info, input):
         "name": input["name"],
         "grade": input["grade"],
         "weight": input["weight"],
+        "isTheoretical": is_theoretical,
     }
 
 
@@ -111,13 +113,20 @@ def resolve_update_assignment(_, _info, input):
     name = input.get("name", assignment["name"])
     grade = input.get("grade", assignment["grade"])
     weight = input.get("weight", assignment["weight"])
+    is_theoretical = input.get("isTheoretical", assignment.get("is_theoretical", False))
 
     db.execute_command(
-        "UPDATE assignments SET name = ?, grade = ?, weight = ? WHERE id = ?",
-        (name, grade, weight, assignment_id),
+        "UPDATE assignments SET name = ?, grade = ?, weight = ?, is_theoretical = ? WHERE id = ?",
+        (name, grade, weight, is_theoretical, assignment_id),
     )
 
-    return {"id": assignment_id, "name": name, "grade": grade, "weight": weight}
+    return {
+        "id": assignment_id,
+        "name": name,
+        "grade": grade,
+        "weight": weight,
+        "isTheoretical": is_theoretical,
+    }
 
 
 @mutation.field("deleteAssignment")
@@ -131,3 +140,45 @@ def resolve_delete_assignment(_, _info, id):
 
     db.execute_command("DELETE FROM assignments WHERE id = ?", (assignment_id,))
     return id
+
+
+@mutation.field("syncTheoreticalAssignments")
+def resolve_sync_theoretical_assignments(_, _info, from_course_id):
+    course_id = int(from_course_id)
+    course = DbOps.get_by_id("courses", course_id)
+
+    if not course:
+        msg = f"Course with ID {course_id} not found"
+        raise Exception(msg)
+
+    # Get real assignments for this course
+    real_assignments = db.execute_query(
+        "SELECT * FROM assignments WHERE course_id = ? AND is_theoretical = 0",
+        (course_id,),
+    )
+
+    # Delete existing theoretical assignments
+    db.execute_command(
+        "DELETE FROM assignments WHERE course_id = ? AND is_theoretical = 1",
+        (course_id,),
+    )
+
+    # Create new theoretical assignments based on real ones
+    theoretical_assignments = []
+    for assignment in real_assignments:
+        # Create a new theoretical assignment based on the real one
+        theoretical_id = db.execute_command(
+            "INSERT INTO assignments (name, grade, weight, course_id, is_theoretical) VALUES (?, ?, ?, ?, 1)",
+            (assignment["name"], assignment["grade"], assignment["weight"], course_id),
+        )
+
+        theoretical_assignment = {
+            "id": theoretical_id,
+            "name": assignment["name"],
+            "grade": assignment["grade"],
+            "weight": assignment["weight"],
+            "isTheoretical": True,
+        }
+        theoretical_assignments.append(theoretical_assignment)
+
+    return theoretical_assignments

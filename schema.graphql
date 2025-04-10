@@ -3,12 +3,14 @@ type Assignment {
     name: String!
     grade: Float!
     weight: Float!
+    isTheoretical: Boolean!
 }
 
 type Course {
     id: ID!
     name: String!
     assignments: [Assignment]!
+    theoreticalAssignments: [Assignment]!
 }
 
 type User {
@@ -49,6 +51,7 @@ input CreateAssignmentInput {
     grade: Float!
     weight: Float!
     courseId: ID! # To associate the assignment with a course
+    isTheoretical: Boolean = false
 }
 
 input UpdateAssignmentInput {
@@ -56,6 +59,7 @@ input UpdateAssignmentInput {
     name: String
     grade: Float
     weight: Float
+    isTheoretical: Boolean
 }
 
 type Mutation {
@@ -70,4 +74,6 @@ type Mutation {
     createAssignment(input: CreateAssignmentInput!): Assignment!
     updateAssignment(input: UpdateAssignmentInput!): Assignment!
     deleteAssignment(id: ID!): ID!
+    
+    syncTheoreticalAssignments(courseId: ID!): [Assignment]!
 }

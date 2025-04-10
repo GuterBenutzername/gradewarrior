@@ -8,12 +8,14 @@ export interface Assignment {
   name: string;
   grade: number;
   weight: number;
+  isTheoretical: boolean;
 }
 
 export interface Course {
   id: string;
   name: string;
   assignments: Assignment[];
+  theoreticalAssignments: Assignment[];
 }
 
 export interface User {
@@ -59,6 +61,7 @@ export interface CreateAssignmentInput {
   grade: number;
   weight: number;
   courseId: string;
+  isTheoretical?: boolean;
 }
 
 export interface UpdateAssignmentInput {
@@ -66,6 +69,7 @@ export interface UpdateAssignmentInput {
   name?: string;
   grade?: number;
   weight?: number;
+  isTheoretical?: boolean;
 }
 
 export interface DeleteInput {

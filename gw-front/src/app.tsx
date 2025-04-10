@@ -1,9 +1,9 @@
 import "./styles/global.css";
 import { useMutation, useQuery } from "@apollo/client";
-import { Course, Assignment } from "./types.ts";
+import { Course, UpdateAssignmentInput, UpdateCourseInput } from "./types.ts";
 import { MUTATIONS, QUERIES } from "./graphql/index.ts";
 import { CourseItem } from "./components/CourseItem.tsx";
-import { useState, useEffect, useRef } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { useTranslation } from "preact-i18next";
 
 export function App() {
@@ -11,7 +11,18 @@ export function App() {
   const [isAddingCourse, setIsAddingCourse] = useState(false);
   const [newCourseName, setNewCourseName] = useState("");
   const [courses, setCourses] = useState<Course[]>([]);
-  const [pendingChanges, setPendingChanges] = useState<Map<string, any>>(new Map());
+  const [pendingChanges, setPendingChanges] = useState<
+    Map<
+      string,
+      [
+        string,
+        string,
+        UpdateCourseInput | UpdateAssignmentInput | { id: number },
+      ]
+    >
+  >(
+    new Map(),
+  );
   const pendingTimeoutRef = useRef<number | null>(null);
 
   // Queries
@@ -26,6 +37,9 @@ export function App() {
   const [createAssignment] = useMutation(MUTATIONS.CREATE_ASSIGNMENT);
   const [updateAssignment] = useMutation(MUTATIONS.UPDATE_ASSIGNMENT);
   const [deleteAssignment] = useMutation(MUTATIONS.DELETE_ASSIGNMENT);
+  const [syncTheoreticalAssignments] = useMutation(
+    MUTATIONS.SYNC_THEORETICAL_ASSIGNMENTS,
+  );
 
   // Initialize local state from query data
   useEffect(() => {
@@ -37,13 +51,13 @@ export function App() {
   // Process pending changes
   const processPendingChanges = async () => {
     if (pendingChanges.size === 0) return;
-    
+
     const changes = Array.from(pendingChanges);
     setPendingChanges(new Map());
-    
+
     for (const [id, change] of changes) {
       const [type, action, payload] = change;
-      
+
       try {
         if (type === "course") {
           if (action === "update") {
@@ -61,14 +75,14 @@ export function App() {
       } catch (error) {
         console.error("Error processing change:", error);
         // Restore the changes to pending if they fail
-        setPendingChanges(prev => {
+        setPendingChanges((prev) => {
           const newMap = new Map(prev);
           newMap.set(id, change);
           return newMap;
         });
       }
     }
-    
+
     // Refetch data after batch processing
     refetch();
   };
@@ -79,13 +93,13 @@ export function App() {
       if (pendingTimeoutRef.current) {
         clearTimeout(pendingTimeoutRef.current);
       }
-      
+
       pendingTimeoutRef.current = setTimeout(() => {
         processPendingChanges();
         pendingTimeoutRef.current = null;
       }, 2000) as unknown as number;
     }
-    
+
     return () => {
       if (pendingTimeoutRef.current) {
         clearTimeout(pendingTimeoutRef.current);
@@ -97,8 +111,13 @@ export function App() {
   if (loading && !courses.length) return <p>{t("app.loading")}</p>;
   if (error) return <p>{t("app.error")}</p>;
 
-  const schedulePendingChange = (type: string, id: string, action: string, payload: any) => {
-    setPendingChanges(prev => {
+  const schedulePendingChange = (
+    type: string,
+    id: string,
+    action: string,
+    payload: UpdateCourseInput | UpdateAssignmentInput | { id: number },
+  ) => {
+    setPendingChanges((prev) => {
       const newMap = new Map(prev);
       newMap.set(id, [type, action, payload]);
       return newMap;
@@ -107,12 +126,12 @@ export function App() {
 
   const handleCourseChange = (courseId: string, value: string) => {
     // Update local state immediately
-    setCourses(prevCourses => 
-      prevCourses.map(course => 
+    setCourses((prevCourses) =>
+      prevCourses.map((course) =>
         course.id === courseId ? { ...course, name: value } : course
       )
     );
-    
+
     // Schedule the API update
     schedulePendingChange("course", courseId, "update", {
       id: courseId,
@@ -122,8 +141,10 @@ export function App() {
 
   const handleDeleteCourse = (courseId: string) => {
     // Update local state immediately
-    setCourses(prevCourses => prevCourses.filter(course => course.id !== courseId));
-    
+    setCourses((prevCourses) =>
+      prevCourses.filter((course) => course.id !== courseId)
+    );
+
     // Schedule the API update
     schedulePendingChange("course", courseId, "delete", { id: courseId });
   };
@@ -134,28 +155,56 @@ export function App() {
     value: string | number,
   ) => {
     // Update local state immediately
-    setCourses(prevCourses => 
-      prevCourses.map(course => ({
-        ...course,
-        assignments: course.assignments.map(assignment => 
-          assignment.id === assignmentId 
-            ? { 
-                ...assignment, 
-                [field]: field === "grade" || field === "weight" 
-                  ? parseFloat(value as string) 
-                  : value 
-              } 
-            : assignment
-        )
-      }))
+    setCourses((prevCourses) =>
+      prevCourses.map((course) => {
+        // Check in real assignments
+        const realAssignmentIndex = course.assignments.findIndex((a) =>
+          a.id === assignmentId
+        );
+        if (realAssignmentIndex >= 0) {
+          const updatedAssignments = [...course.assignments];
+          updatedAssignments[realAssignmentIndex] = {
+            ...updatedAssignments[realAssignmentIndex],
+            [field]: field === "grade" || field === "weight"
+              ? parseFloat(value as string)
+              : value,
+          };
+          return {
+            ...course,
+            assignments: updatedAssignments,
+          };
+        }
+
+        // Check in theoretical assignments
+        const theoreticalAssignmentIndex = course.theoreticalAssignments
+          .findIndex((a) => a.id === assignmentId);
+        if (theoreticalAssignmentIndex >= 0) {
+          const updatedTheoreticalAssignments = [
+            ...course.theoreticalAssignments,
+          ];
+          updatedTheoreticalAssignments[theoreticalAssignmentIndex] = {
+            ...updatedTheoreticalAssignments[theoreticalAssignmentIndex],
+            [field]: field === "grade" || field === "weight"
+              ? parseFloat(value as string)
+              : value,
+          };
+          return {
+            ...course,
+            theoreticalAssignments: updatedTheoreticalAssignments,
+          };
+        }
+
+        return course;
+      })
     );
-    
+
     // Create variables for the API call
     const variables: {
       id: string;
       name?: string;
       grade?: number;
       weight?: number;
+      isTheoretical?: boolean;
     } = { id: assignmentId };
 
     if (field === "name") {
@@ -163,28 +212,85 @@ export function App() {
     } else if (field === "grade" || field === "weight") {
       variables[field] = parseFloat(value as string);
     }
-    
+
+    // Find the assignment to get its isTheoretical value
+    let isTheoretical: boolean | undefined;
+
+    // Look in all courses for the assignment
+    for (const course of courses) {
+      // Check in real assignments
+      const realAssignment = course.assignments.find((a) =>
+        a.id === assignmentId
+      );
+      if (realAssignment) {
+        isTheoretical = realAssignment.isTheoretical;
+        break;
+      }
+
+      // Check in theoretical assignments
+      const theoreticalAssignment = course.theoreticalAssignments.find((a) =>
+        a.id === assignmentId
+      );
+      if (theoreticalAssignment) {
+        isTheoretical = theoreticalAssignment.isTheoretical;
+        break;
+      }
+    }
+
+    // Always include isTheoretical in the update to prevent it from being set to null
+    variables.isTheoretical = isTheoretical !== undefined
+      ? isTheoretical
+      : false;
+
     // Schedule the API update
     schedulePendingChange("assignment", assignmentId, "update", variables);
   };
 
   const handleDeleteAssignment = (assignmentId: string) => {
     // Update local state immediately
-    setCourses(prevCourses => 
-      prevCourses.map(course => ({
-        ...course,
-        assignments: course.assignments.filter(assignment => assignment.id !== assignmentId)
-      }))
+    setCourses((prevCourses) =>
+      prevCourses.map((course) => {
+        // Check if the assignment is in the real assignments
+        const inRealAssignments = course.assignments.some((a) =>
+          a.id === assignmentId
+        );
+        if (inRealAssignments) {
+          return {
+            ...course,
+            assignments: course.assignments.filter((a) =>
+              a.id !== assignmentId
+            ),
+          };
+        }
+
+        // Check if the assignment is in the theoretical assignments
+        const inTheoreticalAssignments = course.theoreticalAssignments.some(
+          (a) => a.id === assignmentId,
+        );
+        if (inTheoreticalAssignments) {
+          return {
+            ...course,
+            theoreticalAssignments: course.theoreticalAssignments.filter((a) =>
+              a.id !== assignmentId
+            ),
+          };
+        }
+
+        return course;
+      })
     );
-    
+
     // Schedule the API update
-    schedulePendingChange("assignment", assignmentId, "delete", { id: assignmentId });
+    schedulePendingChange("assignment", assignmentId, "delete", {
+      id: assignmentId,
+    });
   };
 
   const handleAddAssignment = async (courseId: string, assignmentData: {
     name: string;
     grade: number;
     weight: number;
+    isTheoretical: boolean;
   }) => {
     if (!assignmentData.name) return;
 
@@ -196,25 +302,64 @@ export function App() {
           grade: assignmentData.grade,
           weight: assignmentData.weight,
           courseId: courseId,
+          isTheoretical: assignmentData.isTheoretical,
         },
       });
-      
+
       // Update local state with the new assignment including its server-generated ID
       if (result.data?.createAssignment) {
         const newAssignment = result.data.createAssignment;
-        setCourses(prevCourses => 
-          prevCourses.map(course => 
-            course.id === courseId 
-              ? { 
-                  ...course, 
-                  assignments: [...course.assignments, newAssignment] 
-                } 
+        setCourses((prevCourses) =>
+          prevCourses.map((course) => {
+            if (course.id === courseId) {
+              // Check if this is a theoretical assignment
+              if (newAssignment.isTheoretical) {
+                return {
+                  ...course,
+                  theoreticalAssignments: [
+                    ...course.theoreticalAssignments,
+                    newAssignment,
+                  ],
+                };
+              } else {
+                return {
+                  ...course,
+                  assignments: [...course.assignments, newAssignment],
+                };
+              }
+            }
+            return course;
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error creating assignment:", error);
+    }
+  };
+
+  const handleSyncTheoreticalAssignments = async (courseId: string) => {
+    try {
+      const result = await syncTheoreticalAssignments({
+        variables: { courseId },
+      });
+
+      if (result.data?.syncTheoreticalAssignments) {
+        const theoreticalAssignments = result.data.syncTheoreticalAssignments;
+
+        // Update local state with the new theoretical assignments
+        setCourses((prevCourses) =>
+          prevCourses.map((course) =>
+            course.id === courseId
+              ? {
+                ...course,
+                theoreticalAssignments: theoreticalAssignments,
+              }
               : course
           )
         );
       }
     } catch (error) {
-      console.error("Error creating assignment:", error);
+      console.error("Error syncing theoretical assignments:", error);
     }
   };
 
@@ -223,14 +368,15 @@ export function App() {
       const result = await createCourse({
         variables: { name },
       });
-      
+
       // Update local state with the new course including its server-generated ID
       if (result.data?.createCourse) {
         const newCourse = {
           ...result.data.createCourse,
           assignments: [],
+          theoreticalAssignments: [],
         };
-        setCourses(prevCourses => [...prevCourses, newCourse]);
+        setCourses((prevCourses) => [...prevCourses, newCourse]);
       }
     } catch (error) {
       console.error("Error creating course:", error);
@@ -239,7 +385,7 @@ export function App() {
 
   const handleAddCourse = () => {
     if (!newCourseName.trim()) return;
-    
+
     handleCreateCourse(newCourseName);
     setIsAddingCourse(false);
     setNewCourseName("");
@@ -272,6 +418,7 @@ export function App() {
           onAssignmentChange={handleAssignmentChange}
           onDeleteAssignment={handleDeleteAssignment}
           onAddAssignment={handleAddAssignment}
+          onSyncTheoreticalAssignments={handleSyncTheoreticalAssignments}
           onBlur={handleBlur}
         />
       ))}
@@ -315,11 +462,11 @@ export function App() {
             {t("course.addCourseButton")}
           </button>
         )}
-        
+
       {pendingChanges.size > 0 && (
         <div className="pending-changes">
           <span>{pendingChanges.size} pending changes</span>
-          <button onClick={handleSyncNow} className="sync-button">
+          <button type="button" onClick={handleSyncNow} className="sync-button">
             Sync Now
           </button>
         </div>

@@ -3,24 +3,29 @@ import { useTranslation } from "preact-i18next";
 
 interface NewAssignmentFormProps {
   courseId: string;
-  formData?: { name: string; grade: number; weight: number };
+  formData?: {
+    name: string;
+    grade: number;
+    weight: number;
+    isTheoretical?: boolean;
+  };
   onNewAssignmentChange: (
     courseId: string,
     field: string,
     value: string | number,
   ) => void;
   onAddAssignment: (courseId: string) => void;
-  onBlur?: () => void;
   isLast?: boolean;
+  onBlur?: () => void;
 }
 
 export function NewAssignmentForm({
   courseId,
-  formData = { name: "", grade: 0, weight: 0 },
+  formData = { name: "", grade: 0, weight: 0, isTheoretical: false },
   onNewAssignmentChange,
   onAddAssignment,
-  onBlur,
   isLast = false,
+  onBlur,
 }: NewAssignmentFormProps) {
   const { t } = useTranslation();
   // Determine container class based on position
