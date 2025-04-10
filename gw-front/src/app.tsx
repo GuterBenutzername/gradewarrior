@@ -6,31 +6,33 @@ import { CourseItem } from "./components/CourseItem.tsx";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { useTranslation } from "preact-i18next";
 
+// Type for pending changes tracking
+type PendingChange = [
+  string, // type: "course" | "assignment"
+  string, // action: "update" | "delete"
+  UpdateCourseInput | UpdateAssignmentInput | { id: number }, // payload
+];
+
 export function App() {
   const { t } = useTranslation();
+
+  // UI State
   const [isAddingCourse, setIsAddingCourse] = useState(false);
   const [newCourseName, setNewCourseName] = useState("");
+
+  // Data State
   const [courses, setCourses] = useState<Course[]>([]);
   const [pendingChanges, setPendingChanges] = useState<
-    Map<
-      string,
-      [
-        string,
-        string,
-        UpdateCourseInput | UpdateAssignmentInput | { id: number },
-      ]
-    >
-  >(
-    new Map(),
-  );
+    Map<string, PendingChange>
+  >(new Map());
   const pendingTimeoutRef = useRef<number | null>(null);
 
-  // Queries
+  // GraphQL Queries
   const { loading, error, data, refetch } = useQuery(QUERIES.GET_COURSES, {
     fetchPolicy: "cache-and-network",
   });
 
-  // Mutations
+  // GraphQL Mutations
   const [createCourse] = useMutation(MUTATIONS.CREATE_COURSE);
   const [updateCourse] = useMutation(MUTATIONS.UPDATE_COURSE);
   const [deleteCourse] = useMutation(MUTATIONS.DELETE_COURSE);
@@ -48,7 +50,20 @@ export function App() {
     }
   }, [data]);
 
-  // Process pending changes
+  // Pending changes management
+  const schedulePendingChange = (
+    type: string,
+    id: string,
+    action: string,
+    payload: UpdateCourseInput | UpdateAssignmentInput | { id: number },
+  ) => {
+    setPendingChanges((prev) => {
+      const newMap = new Map(prev);
+      newMap.set(id, [type, action, payload]);
+      return newMap;
+    });
+  };
+
   const processPendingChanges = async () => {
     if (pendingChanges.size === 0) return;
 
@@ -87,7 +102,7 @@ export function App() {
     refetch();
   };
 
-  // Schedule processing of pending changes
+  // Schedule debounced processing of pending changes
   useEffect(() => {
     if (pendingChanges.size > 0) {
       if (pendingTimeoutRef.current) {
@@ -107,21 +122,48 @@ export function App() {
     };
   }, [pendingChanges]);
 
-  // Loading and error states
-  if (loading && !courses.length) return <p>{t("app.loading")}</p>;
-  if (error) return <p>{t("app.error")}</p>;
+  // Force sync with server immediately
+  const handleSyncNow = () => {
+    if (pendingTimeoutRef.current) {
+      clearTimeout(pendingTimeoutRef.current);
+      pendingTimeoutRef.current = null;
+    }
+    processPendingChanges();
+  };
 
-  const schedulePendingChange = (
-    type: string,
-    id: string,
-    action: string,
-    payload: UpdateCourseInput | UpdateAssignmentInput | { id: number },
-  ) => {
-    setPendingChanges((prev) => {
-      const newMap = new Map(prev);
-      newMap.set(id, [type, action, payload]);
-      return newMap;
-    });
+  // Add onBlur handlers to components to trigger immediate sync
+  const handleBlur = () => {
+    if (pendingChanges.size > 0) {
+      handleSyncNow();
+    }
+  };
+
+  // Course operations
+  const handleCreateCourse = async (name: string) => {
+    try {
+      const result = await createCourse({
+        variables: { name },
+      });
+
+      if (result.data?.createCourse) {
+        const newCourse = {
+          ...result.data.createCourse,
+          assignments: [],
+          theoreticalAssignments: [],
+        };
+        setCourses((prevCourses) => [...prevCourses, newCourse]);
+      }
+    } catch (error) {
+      console.error("Error creating course:", error);
+    }
+  };
+
+  const handleAddCourse = () => {
+    if (!newCourseName.trim()) return;
+
+    handleCreateCourse(newCourseName);
+    setIsAddingCourse(false);
+    setNewCourseName("");
   };
 
   const handleCourseChange = (courseId: string, value: string) => {
@@ -149,6 +191,55 @@ export function App() {
     schedulePendingChange("course", courseId, "delete", { id: courseId });
   };
 
+  // Assignment operations
+  const handleAddAssignment = async (courseId: string, assignmentData: {
+    name: string;
+    grade: number;
+    weight: number;
+    isTheoretical: boolean;
+  }) => {
+    if (!assignmentData.name) return;
+
+    try {
+      const result = await createAssignment({
+        variables: {
+          name: assignmentData.name,
+          grade: assignmentData.grade,
+          weight: assignmentData.weight,
+          courseId: courseId,
+          isTheoretical: assignmentData.isTheoretical,
+        },
+      });
+
+      if (result.data?.createAssignment) {
+        const newAssignment = result.data.createAssignment;
+        setCourses((prevCourses) =>
+          prevCourses.map((course) => {
+            if (course.id === courseId) {
+              if (newAssignment.isTheoretical) {
+                return {
+                  ...course,
+                  theoreticalAssignments: [
+                    ...course.theoreticalAssignments,
+                    newAssignment,
+                  ],
+                };
+              } else {
+                return {
+                  ...course,
+                  assignments: [...course.assignments, newAssignment],
+                };
+              }
+            }
+            return course;
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error creating assignment:", error);
+    }
+  };
+
   const handleAssignmentChange = (
     assignmentId: string,
     field: string,
@@ -157,7 +248,7 @@ export function App() {
     // Update local state immediately
     setCourses((prevCourses) =>
       prevCourses.map((course) => {
-        // Check in real assignments
+        // Find and update in real assignments
         const realAssignmentIndex = course.assignments.findIndex((a) =>
           a.id === assignmentId
         );
@@ -175,7 +266,7 @@ export function App() {
           };
         }
 
-        // Check in theoretical assignments
+        // Find and update in theoretical assignments
         const theoreticalAssignmentIndex = course.theoreticalAssignments
           .findIndex((a) => a.id === assignmentId);
         if (theoreticalAssignmentIndex >= 0) {
@@ -213,34 +304,30 @@ export function App() {
       variables[field] = parseFloat(value as string);
     }
 
-    // Find the assignment to get its isTheoretical value
-    let isTheoretical: boolean | undefined;
+    // Find the assignment's isTheoretical value
+    let isTheoretical = false;
 
     // Look in all courses for the assignment
     for (const course of courses) {
-      // Check in real assignments
       const realAssignment = course.assignments.find((a) =>
         a.id === assignmentId
       );
       if (realAssignment) {
-        isTheoretical = realAssignment.isTheoretical;
+        isTheoretical = !!realAssignment.isTheoretical;
         break;
       }
 
-      // Check in theoretical assignments
       const theoreticalAssignment = course.theoreticalAssignments.find((a) =>
         a.id === assignmentId
       );
       if (theoreticalAssignment) {
-        isTheoretical = theoreticalAssignment.isTheoretical;
+        isTheoretical = !!theoreticalAssignment.isTheoretical;
         break;
       }
     }
 
-    // Always include isTheoretical in the update to prevent it from being set to null
-    variables.isTheoretical = isTheoretical !== undefined
-      ? isTheoretical
-      : false;
+    // Always include isTheoretical in the update
+    variables.isTheoretical = isTheoretical;
 
     // Schedule the API update
     schedulePendingChange("assignment", assignmentId, "update", variables);
@@ -286,57 +373,6 @@ export function App() {
     });
   };
 
-  const handleAddAssignment = async (courseId: string, assignmentData: {
-    name: string;
-    grade: number;
-    weight: number;
-    isTheoretical: boolean;
-  }) => {
-    if (!assignmentData.name) return;
-
-    // Create the assignment on the server immediately (we need the new ID)
-    try {
-      const result = await createAssignment({
-        variables: {
-          name: assignmentData.name,
-          grade: assignmentData.grade,
-          weight: assignmentData.weight,
-          courseId: courseId,
-          isTheoretical: assignmentData.isTheoretical,
-        },
-      });
-
-      // Update local state with the new assignment including its server-generated ID
-      if (result.data?.createAssignment) {
-        const newAssignment = result.data.createAssignment;
-        setCourses((prevCourses) =>
-          prevCourses.map((course) => {
-            if (course.id === courseId) {
-              // Check if this is a theoretical assignment
-              if (newAssignment.isTheoretical) {
-                return {
-                  ...course,
-                  theoreticalAssignments: [
-                    ...course.theoreticalAssignments,
-                    newAssignment,
-                  ],
-                };
-              } else {
-                return {
-                  ...course,
-                  assignments: [...course.assignments, newAssignment],
-                };
-              }
-            }
-            return course;
-          })
-        );
-      }
-    } catch (error) {
-      console.error("Error creating assignment:", error);
-    }
-  };
-
   const handleSyncTheoreticalAssignments = async (courseId: string) => {
     try {
       const result = await syncTheoreticalAssignments({
@@ -363,49 +399,9 @@ export function App() {
     }
   };
 
-  const handleCreateCourse = async (name: string) => {
-    try {
-      const result = await createCourse({
-        variables: { name },
-      });
-
-      // Update local state with the new course including its server-generated ID
-      if (result.data?.createCourse) {
-        const newCourse = {
-          ...result.data.createCourse,
-          assignments: [],
-          theoreticalAssignments: [],
-        };
-        setCourses((prevCourses) => [...prevCourses, newCourse]);
-      }
-    } catch (error) {
-      console.error("Error creating course:", error);
-    }
-  };
-
-  const handleAddCourse = () => {
-    if (!newCourseName.trim()) return;
-
-    handleCreateCourse(newCourseName);
-    setIsAddingCourse(false);
-    setNewCourseName("");
-  };
-
-  // Force sync with server
-  const handleSyncNow = () => {
-    if (pendingTimeoutRef.current) {
-      clearTimeout(pendingTimeoutRef.current);
-      pendingTimeoutRef.current = null;
-    }
-    processPendingChanges();
-  };
-
-  // Add onBlur handlers to components to trigger immediate sync
-  const handleBlur = () => {
-    if (pendingChanges.size > 0) {
-      handleSyncNow();
-    }
-  };
+  // Loading and error states
+  if (loading && !courses.length) return <p>{t("app.loading")}</p>;
+  if (error) return <p>{t("app.error")}</p>;
 
   return (
     <div class="courses" onBlur={handleBlur}>

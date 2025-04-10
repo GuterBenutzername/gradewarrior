@@ -143,8 +143,8 @@ def resolve_delete_assignment(_, _info, id):
 
 
 @mutation.field("syncTheoreticalAssignments")
-def resolve_sync_theoretical_assignments(_, _info, from_course_id):
-    course_id = int(from_course_id)
+def resolve_sync_theoretical_assignments(_, _info, courseId):  # noqa: N803
+    course_id = int(courseId)
     course = DbOps.get_by_id("courses", course_id)
 
     if not course:
