@@ -1,0 +1,73 @@
+type Assignment {
+    id: ID!
+    name: String!
+    grade: Float!
+    weight: Float!
+}
+
+type Course {
+    id: ID!
+    name: String!
+    assignments: [Assignment]!
+}
+
+type User {
+    id: ID!
+    name: String!
+    courses: [Course]!
+}
+
+type Query {
+    user(id: ID!): User
+    users: [User!]!
+    course(id: ID!): Course
+    courses: [Course!]!
+    assignment(id: ID!): Assignment
+    assignments: [Assignment!]!
+}
+
+input CreateUserInput {
+    name: String!
+}
+
+input UpdateUserInput {
+    id: ID!
+    name: String
+}
+
+input CreateCourseInput {
+    name: String!
+}
+
+input UpdateCourseInput {
+    id: ID!
+    name: String
+}
+
+input CreateAssignmentInput {
+    name: String!
+    grade: Float!
+    weight: Float!
+    courseId: ID! # To associate the assignment with a course
+}
+
+input UpdateAssignmentInput {
+    id: ID!
+    name: String
+    grade: Float
+    weight: Float
+}
+
+type Mutation {
+    createUser(input: CreateUserInput!): User!
+    updateUser(input: UpdateUserInput!): User!
+    deleteUser(id: ID!): ID!
+
+    createCourse(input: CreateCourseInput!): Course!
+    updateCourse(input: UpdateCourseInput!): Course!
+    deleteCourse(id: ID!): ID!
+
+    createAssignment(input: CreateAssignmentInput!): Assignment!
+    updateAssignment(input: UpdateAssignmentInput!): Assignment!
+    deleteAssignment(id: ID!): ID!
+}
