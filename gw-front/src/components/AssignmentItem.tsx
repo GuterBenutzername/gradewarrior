@@ -10,6 +10,7 @@ interface AssignmentItemProps {
     value: string | number,
   ) => void;
   onDeleteAssignment: (id: string) => void;
+  onBlur?: () => void;
   isFirst?: boolean;
   isLast?: boolean;
 }
@@ -18,6 +19,7 @@ export function AssignmentItem({
   assignment,
   onAssignmentChange,
   onDeleteAssignment,
+  onBlur,
   isFirst = false,
   isLast = false,
 }: AssignmentItemProps) {
@@ -38,6 +40,7 @@ export function AssignmentItem({
             "name",
             (e.target as HTMLInputElement).value,
           )}
+        onBlur={onBlur}
       />
 
       <input
@@ -50,6 +53,7 @@ export function AssignmentItem({
             "grade",
             (e.target as HTMLInputElement).value,
           )}
+        onBlur={onBlur}
       />
       <input
         type="number"
@@ -61,6 +65,7 @@ export function AssignmentItem({
             "weight",
             (e.target as HTMLInputElement).value,
           )}
+        onBlur={onBlur}
       />
       <button
         type="button"

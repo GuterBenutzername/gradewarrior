@@ -10,6 +10,7 @@ interface NewAssignmentFormProps {
     value: string | number,
   ) => void;
   onAddAssignment: (courseId: string) => void;
+  onBlur?: () => void;
   isLast?: boolean;
 }
 
@@ -18,6 +19,7 @@ export function NewAssignmentForm({
   formData = { name: "", grade: 0, weight: 0 },
   onNewAssignmentChange,
   onAddAssignment,
+  onBlur,
   isLast = false,
 }: NewAssignmentFormProps) {
   const { t } = useTranslation();
@@ -39,6 +41,7 @@ export function NewAssignmentForm({
             "name",
             (e.target as HTMLInputElement).value,
           )}
+        onBlur={onBlur}
       />
       <input
         type="number"
@@ -51,6 +54,7 @@ export function NewAssignmentForm({
             "grade",
             (e.target as HTMLInputElement).value,
           )}
+        onBlur={onBlur}
       />
       <input
         type="number"
@@ -63,6 +67,7 @@ export function NewAssignmentForm({
             "weight",
             (e.target as HTMLInputElement).value,
           )}
+        onBlur={onBlur}
       />
       <button
         type="button"

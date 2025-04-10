@@ -20,6 +20,7 @@ interface CourseItemProps {
     courseId: string,
     assignmentData: { name: string; grade: number; weight: number },
   ) => void;
+  onBlur?: () => void;
 }
 
 export function CourseItem({
@@ -29,6 +30,7 @@ export function CourseItem({
   onAssignmentChange,
   onDeleteAssignment,
   onAddAssignment,
+  onBlur,
 }: CourseItemProps) {
   const { t } = useTranslation();
   const [newAssignmentData, setNewAssignmentData] = useState<{
@@ -57,6 +59,7 @@ export function CourseItem({
     // Reset form after adding
     setNewAssignmentData({ name: "", grade: 0, weight: 0 });
   };
+  
   return (
     <div
       key={course.id}
@@ -74,6 +77,7 @@ export function CourseItem({
                 course.id,
                 (e.target as HTMLInputElement).value,
               )}
+            onBlur={onBlur}
           />
           <button
             onClick={() => onDeleteCourse(course.id)}
@@ -117,6 +121,7 @@ export function CourseItem({
               assignment={assignment}
               onAssignmentChange={onAssignmentChange}
               onDeleteAssignment={onDeleteAssignment}
+              onBlur={onBlur}
               isFirst={index === 0}
             />
           ))}
@@ -127,6 +132,7 @@ export function CourseItem({
             formData={newAssignmentData}
             onNewAssignmentChange={handleNewAssignmentChange}
             onAddAssignment={handleAddAssignment}
+            onBlur={onBlur}
             isLast
           />
         </ul>
