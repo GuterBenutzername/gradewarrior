@@ -1,7 +1,6 @@
 import { Course } from "../types.ts";
 import { AssignmentItem } from "./AssignmentItem.tsx";
 import { NewAssignmentForm } from "./NewAssignmentForm.tsx";
-import { useState } from "preact/hooks";
 import styles from "./CourseItem.module.css";
 import { gradeCalc } from "../utils/gradeCalc.ts";
 import { useTranslation } from "preact-i18next";
@@ -42,7 +41,6 @@ export function CourseItem({
   onBlur,
 }: CourseItemProps) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<"real" | "theoretical">("real");
 
   const handleSyncTheoreticalAssignments = () => {
     onSyncTheoreticalAssignments(course.id);
@@ -95,69 +93,98 @@ export function CourseItem({
         </div>
       </div>
 
-      <div class={styles["assignments-tab-container"]}>
-        <div class={styles["tabs"]}>
-          <button
-            type="button"
-            class={`${styles["tab-button"]} ${
-              activeTab === "real" ? styles["active-tab"] : ""
-            }`}
-            onClick={() => setActiveTab("real")}
-          >
-            {t("course.realAssignments")}
-          </button>
-          <button
-            type="button"
-            class={`${styles["tab-button"]} ${
-              activeTab === "theoretical" ? styles["active-tab"] : ""
-            }`}
-            onClick={() => setActiveTab("theoretical")}
-          >
-            {t("course.theoreticalAssignments")}
-          </button>
-              <button
-                type="button"
-                class={styles["sync-button"]}
-                onClick={activeTab === "theoretical" ? handleSyncTheoreticalAssignments : handleApplyTheoreticalAssignments}
-              >
-                {activeTab == "theoretical" ? t("course.syncWithReal") : t("course.applyToReal")}
-              </button>
-        </div>
-      </div>
+      <div class={styles["assignments-container-wrapper"]}>
+        <div class={styles["assignments-side-by-side"]}>
+          <div class={styles["assignments-column"]}>
+            <h3 class={styles["column-title"]}>{t("course.realAssignments")}</h3>
+            <div class={styles["assignments-container"]}>
+              <div class={styles["assignments-header"]}>
+                <div class={styles["assignment-name-header"]}>
+                  {t("course.assignmentName")}
+                </div>
+                <div class={styles["assignment-grade-header"]}>
+                  {t("course.grade")}
+                </div>
+                <div class={styles["assignment-weight-header"]}>
+                  {t("course.weight")}
+                </div>
+              </div>
+              <ul class={styles["assignment-list"]}>
+                {course.assignments.map((assignment, index) => (
+                  <AssignmentItem
+                    key={assignment.id}
+                    assignment={assignment}
+                    onAssignmentChange={onAssignmentChange}
+                    onDeleteAssignment={onDeleteAssignment}
+                    onBlur={onBlur}
+                    isFirst={index === 0}
+                  />
+                ))}
 
-      <div class={styles["assignments-container"]}>
-        <div class={styles["assignments-header"]}>
-          <div class={styles["assignment-name-header"]}>
-            {t("course.assignmentName")}
+                <NewAssignmentForm
+                  courseId={course.id}
+                  onAddAssignment={onAddAssignment}
+                  isTheoretical={false}
+                />
+              </ul>
+            </div>
           </div>
-          <div class={styles["assignment-grade-header"]}>
-            {t("course.grade")}
+
+          <div class={styles["sync-buttons-container"]}>
+            <button
+              type="button"
+              class={styles["sync-button"]}
+              onClick={handleSyncTheoreticalAssignments}
+              title={t("course.syncWithReal")}
+            >
+              <span class={styles["sync-icon"]}>→</span>
+            </button>
+            
+            <button
+              type="button"
+              class={styles["sync-button"]}
+              onClick={handleApplyTheoreticalAssignments}
+              title={t("course.applyToReal")}
+            >
+              <span class={styles["sync-icon"]}>←</span>
+            </button>
           </div>
-          <div class={styles["assignment-weight-header"]}>
-            {t("course.weight")}
+
+          <div class={styles["assignments-column"]}>
+            <h3 class={styles["column-title"]}>{t("course.theoreticalAssignments")}</h3>
+            <div class={styles["assignments-container"]}>
+              <div class={styles["assignments-header"]}>
+                <div class={styles["assignment-name-header"]}>
+                  {t("course.assignmentName")}
+                </div>
+                <div class={styles["assignment-grade-header"]}>
+                  {t("course.grade")}
+                </div>
+                <div class={styles["assignment-weight-header"]}>
+                  {t("course.weight")}
+                </div>
+              </div>
+              <ul class={styles["assignment-list"]}>
+                {course.theoreticalAssignments.map((assignment, index) => (
+                  <AssignmentItem
+                    key={assignment.id}
+                    assignment={assignment}
+                    onAssignmentChange={onAssignmentChange}
+                    onDeleteAssignment={onDeleteAssignment}
+                    onBlur={onBlur}
+                    isFirst={index === 0}
+                  />
+                ))}
+
+                <NewAssignmentForm
+                  courseId={course.id}
+                  onAddAssignment={onAddAssignment}
+                  isTheoretical={true}
+                />
+              </ul>
+            </div>
           </div>
         </div>
-        <ul class={styles["assignment-list"]}>
-          {(activeTab === "real"
-            ? course.assignments
-            : course.theoreticalAssignments).map((assignment, index) => (
-              <AssignmentItem
-                key={assignment.id}
-                assignment={assignment}
-                onAssignmentChange={onAssignmentChange}
-                onDeleteAssignment={onDeleteAssignment}
-                onBlur={onBlur}
-                isFirst={index === 0}
-              />
-            ))}
-
-          {/* Add new assignment form - always last */}
-          <NewAssignmentForm
-            courseId={course.id}
-            onAddAssignment={onAddAssignment}
-            isTheoretical={activeTab === "theoretical"}
-          />
-        </ul>
       </div>
     </div>
   );
