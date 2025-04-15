@@ -1,7 +1,7 @@
 {
   "app": {
-    "loading": "Loading...",
-    "error": "Error :("
+    "loading": "loading...",
+    "error": "error :("
   },
   "course": {
     "newCourse": "new course",
@@ -10,8 +10,8 @@
     "cancel": "cancel",
     "addCourseButton": "+ add course",
     "deleteCourse": "delete course",
-    "current": "current",
-    "projected": "projected",
+    "current": "real",
+    "theoretical": "theoretical",
     "assignmentName": "assignment name",
     "grade": "grade (%)",
     "weight": "weight (%)",

@@ -87,11 +87,9 @@ export function CourseItem({
             </span>
           </div>
           <div class={styles["average-box"]}>
-            <span class={styles["average-label"]}>{t("course.projected")}</span>
+            <span class={styles["average-label"]}>{t("course.theoretical")}</span>
             <span class={styles["average-value"]}>
-              {activeTab === "theoretical"
-                ? gradeCalc(course.theoreticalAssignments).toFixed(2)
-                : gradeCalc(course.assignments).toFixed(2)}%
+              {gradeCalc(course.theoreticalAssignments).toFixed(2)}%
             </span>
           </div>
         </div>
