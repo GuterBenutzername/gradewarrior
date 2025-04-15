@@ -1,9 +1,13 @@
 import { Assignment } from "../types.ts";
 
 export function gradeCalc(c: Assignment[]) {
-  const uniqueWeights = new Set(c.map((a) => a.weight));
-  const totalWeight = Array.from(uniqueWeights).reduce((a, b) => a + b, 0);
-  const weightedGrades = c.map((a) => a.grade * (a.weight / totalWeight));
-  const finalGrade = weightedGrades.reduce((a, b) => a + b, 0);
-  return finalGrade;
+  if (c.length === 0) return 0;
+  let weightedSum = 0;
+  let totalWeight = 0;
+  for (const assignment of c) {
+    weightedSum += assignment.grade * assignment.weight;
+    totalWeight += assignment.weight;
+  }
+  if (totalWeight === 0) return 0;
+  return weightedSum / totalWeight;
 }
