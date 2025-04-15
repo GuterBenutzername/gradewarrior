@@ -8,11 +8,11 @@ import { useTranslation } from "preact-i18next";
 
 interface CourseItemProps {
   course: Course;
-  onCourseChange: (id: string, value: string) => void;
+  onCourseNameChange: (id: string, newName: string) => void;
   onDeleteCourse: (id: string) => void;
   onAssignmentChange: (
     id: string,
-    field: string,
+    field: "name" | "grade" | "weight",
     value: string | number,
   ) => void;
   onDeleteAssignment: (id: string) => void;
@@ -31,7 +31,7 @@ interface CourseItemProps {
 
 export function CourseItem({
   course,
-  onCourseChange,
+  onCourseNameChange: onCourseChange,
   onDeleteCourse,
   onAssignmentChange,
   onDeleteAssignment,
@@ -41,44 +41,6 @@ export function CourseItem({
 }: CourseItemProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"real" | "theoretical">("real");
-  const [newAssignmentData, setNewAssignmentData] = useState<{
-    name: string;
-    grade: number;
-    weight: number;
-    isTheoretical: boolean;
-  }>({ name: "", grade: 0, weight: 0, isTheoretical: false });
-
-  const handleNewAssignmentChange = (
-    _courseId: string,
-    field: string,
-    value: string | number,
-  ) => {
-    setNewAssignmentData({
-      ...newAssignmentData,
-      [field]: field === "grade" || field === "weight"
-        ? parseFloat(value as string) || 0
-        : value,
-    });
-  };
-
-  const handleAddAssignment = (courseId: string) => {
-    if (!newAssignmentData.name) return;
-
-    // Set isTheoretical based on current active tab
-    const assignmentData = {
-      ...newAssignmentData,
-      isTheoretical: activeTab === "theoretical",
-    };
-
-    onAddAssignment(courseId, assignmentData);
-    // Reset form after adding
-    setNewAssignmentData({
-      name: "",
-      grade: 0,
-      weight: 0,
-      isTheoretical: false,
-    });
-  };
 
   const handleSyncTheoreticalAssignments = () => {
     onSyncTheoreticalAssignments(course.id);
@@ -187,13 +149,11 @@ export function CourseItem({
               />
             ))}
 
-          {/* Add new assignment form */}
+          {/* Add new assignment form - always last */}
           <NewAssignmentForm
             courseId={course.id}
-            formData={newAssignmentData}
-            onNewAssignmentChange={handleNewAssignmentChange}
-            onAddAssignment={handleAddAssignment}
-            isLast
+            onAddAssignment={onAddAssignment}
+            isTheoretical={activeTab === "theoretical"}
           />
         </ul>
       </div>

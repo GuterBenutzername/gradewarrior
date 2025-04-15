@@ -1,37 +1,60 @@
 import styles from "./NewAssignmentForm.module.css";
 import { useTranslation } from "preact-i18next";
+import { useState } from "preact/hooks";
 
 interface NewAssignmentFormProps {
   courseId: string;
-  formData?: {
-    name: string;
-    grade: number;
-    weight: number;
-    isTheoretical?: boolean;
-  };
-  onNewAssignmentChange: (
-    courseId: string,
-    field: string,
-    value: string | number,
+  onAddAssignment: (
+    courseId: string, 
+    assignmentData: {
+      name: string;
+      grade: number;
+      weight: number;
+      isTheoretical: boolean;
+    }
   ) => void;
-  onAddAssignment: (courseId: string) => void;
-  isLast?: boolean;
-  onBlur?: () => void;
+  isTheoretical: boolean;
 }
 
 export function NewAssignmentForm({
   courseId,
-  formData = { name: "", grade: 0, weight: 0, isTheoretical: false },
-  onNewAssignmentChange,
   onAddAssignment,
-  isLast = false,
-  onBlur,
+  isTheoretical,
 }: NewAssignmentFormProps) {
   const { t } = useTranslation();
-  // Determine container class based on position
-  const formClass = `${styles["new-assignment-form"]} ${
-    isLast ? styles["last-item"] : ""
-  }`;
+  const [formData, setFormData] = useState<{
+    name: string;
+    grade: number;
+    weight: number;
+  }>({ name: "", grade: 0, weight: 0 });
+
+  const handleChange = (field: string, value: string | number) => {
+    setFormData({
+      ...formData,
+      [field]: field === "grade" || field === "weight"
+        ? parseFloat(value as string) || 0
+        : value,
+    });
+  };
+
+  const handleAddAssignment = () => {
+    if (!formData.name) return;
+
+    onAddAssignment(courseId, {
+      ...formData,
+      isTheoretical
+    });
+
+    // Reset form after adding
+    setFormData({
+      name: "",
+      grade: 0,
+      weight: 0,
+    });
+  };
+
+  // Form is always the last item
+  const formClass = `${styles["new-assignment-form"]} ${styles["last-item"]}`;
 
   return (
     <li class={formClass}>
@@ -41,12 +64,10 @@ export function NewAssignmentForm({
         placeholder={t("assignment.newAssignmentName")}
         value={formData.name}
         onChange={(e) =>
-          onNewAssignmentChange(
-            courseId,
+          handleChange(
             "name",
             (e.target as HTMLInputElement).value,
           )}
-        onBlur={onBlur}
       />
       <input
         type="number"
@@ -54,12 +75,10 @@ export function NewAssignmentForm({
         placeholder={t("assignment.grade")}
         value={formData.grade}
         onChange={(e) =>
-          onNewAssignmentChange(
-            courseId,
+          handleChange(
             "grade",
             (e.target as HTMLInputElement).value,
           )}
-        onBlur={onBlur}
       />
       <input
         type="number"
@@ -67,17 +86,15 @@ export function NewAssignmentForm({
         placeholder={t("assignment.weight")}
         value={formData.weight}
         onChange={(e) =>
-          onNewAssignmentChange(
-            courseId,
+          handleChange(
             "weight",
             (e.target as HTMLInputElement).value,
           )}
-        onBlur={onBlur}
       />
       <button
         type="button"
         class={styles["add-button"]}
-        onClick={() => onAddAssignment(courseId)}
+        onClick={handleAddAssignment}
         title={t("assignment.addAssignment")}
       >
         +

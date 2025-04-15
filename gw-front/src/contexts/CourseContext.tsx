@@ -16,7 +16,7 @@ interface CourseContextType {
   loading: boolean;
   error: { message: string } | undefined;
   pendingChanges: Map<string, PendingChange>;
-  handleCourseChange: (courseId: string, value: string) => void;
+  handleCourseNameChange: (courseId: string, name: string) => void;
   handleDeleteCourse: (courseId: string) => void;
   handleCreateCourse: (name: string) => Promise<Course | null>;
   handleAssignmentChange: (
@@ -182,18 +182,18 @@ export function CourseProvider({ children }: { children: ComponentChildren }) {
     return null;
   };
 
-  const handleCourseChange = (courseId: string, value: string) => {
+  const handleCourseNameChange = (courseId: string, name: string) => {
     // Update local state immediately
     setCourses((prevCourses) =>
       prevCourses.map((course) =>
-        course.id === courseId ? { ...course, name: value } : course
+        course.id === courseId ? { ...course, name } : course
       )
     );
 
     // Schedule the API update
     schedulePendingChange("course", courseId, "update", {
       id: courseId,
-      name: value,
+      name,
     });
   };
 
@@ -422,7 +422,7 @@ export function CourseProvider({ children }: { children: ComponentChildren }) {
         loading,
         error,
         pendingChanges,
-        handleCourseChange,
+        handleCourseNameChange,
         handleDeleteCourse,
         handleCreateCourse,
         handleAssignmentChange,
@@ -438,8 +438,8 @@ export function CourseProvider({ children }: { children: ComponentChildren }) {
   );
 }
 
-export function useCourses() {
-  const context = useContext(CourseContext);
+export function useCourses(): CourseContextType {
+  const context: CourseContextType = useContext(CourseContext);
   if (!context) {
     throw new Error("useCourses must be used within a CourseProvider");
   }

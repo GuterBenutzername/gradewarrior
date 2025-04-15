@@ -6,7 +6,7 @@ interface AssignmentItemProps {
   assignment: Assignment;
   onAssignmentChange: (
     id: string,
-    field: string,
+    field: "name" | "grade" | "weight",
     value: string | number,
   ) => void;
   onDeleteAssignment: (id: string) => void;

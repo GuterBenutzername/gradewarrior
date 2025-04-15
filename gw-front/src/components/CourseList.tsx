@@ -4,7 +4,7 @@ import { useCourses } from "../contexts/CourseContext.tsx";
 export function CourseList() {
   const {
     courses,
-    handleCourseChange,
+    handleCourseNameChange,
     handleDeleteCourse,
     handleAssignmentChange,
     handleDeleteAssignment,
@@ -19,7 +19,7 @@ export function CourseList() {
         <CourseItem
           key={course.id}
           course={course}
-          onCourseChange={handleCourseChange}
+          onCourseNameChange={handleCourseNameChange}
           onDeleteCourse={handleDeleteCourse}
           onAssignmentChange={handleAssignmentChange}
           onDeleteAssignment={handleDeleteAssignment}
