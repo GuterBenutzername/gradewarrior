@@ -10,6 +10,7 @@ export function CourseList() {
     handleDeleteAssignment,
     handleAddAssignment,
     handleSyncTheoreticalAssignments,
+    handleApplyTheoreticalAssignments,
     handleBlur,
   } = useCourses();
 
@@ -25,6 +26,7 @@ export function CourseList() {
           onDeleteAssignment={handleDeleteAssignment}
           onAddAssignment={handleAddAssignment}
           onSyncTheoreticalAssignments={handleSyncTheoreticalAssignments}
+          onApplyTheoreticalAssignments={handleApplyTheoreticalAssignments}
           onBlur={handleBlur}
         />
       ))}

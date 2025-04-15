@@ -76,4 +76,5 @@ type Mutation {
     deleteAssignment(id: ID!): ID!
     
     syncTheoreticalAssignments(courseId: ID!): [Assignment]!
+    applyTheoreticalAssignments(courseId: ID!): [Assignment]!
 }

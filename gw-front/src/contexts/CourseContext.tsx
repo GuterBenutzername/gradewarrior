@@ -35,6 +35,7 @@ interface CourseContextType {
     },
   ) => Promise<void>;
   handleSyncTheoreticalAssignments: (courseId: string) => Promise<void>;
+  handleApplyTheoreticalAssignments: (courseId: string) => Promise<void>;
   handleSyncNow: () => void;
   handleBlur: () => void;
 }
@@ -63,6 +64,9 @@ export function CourseProvider({ children }: { children: ComponentChildren }) {
   const [deleteAssignment] = useMutation(MUTATIONS.DELETE_ASSIGNMENT);
   const [syncTheoreticalAssignments] = useMutation(
     MUTATIONS.SYNC_THEORETICAL_ASSIGNMENTS,
+  );
+  const [applyTheoreticalAssignments] = useMutation(
+    MUTATIONS.APPLY_THEORETICAL_ASSIGNMENTS,
   );
 
   // Initialize local state from query data
@@ -415,6 +419,32 @@ export function CourseProvider({ children }: { children: ComponentChildren }) {
     }
   };
 
+  const handleApplyTheoreticalAssignments = async (courseId: string) => {
+    try {
+      const result = await applyTheoreticalAssignments({
+        variables: { courseId },
+      });
+
+      if (result.data?.applyTheoreticalAssignments) {
+        const realAssignments = result.data.applyTheoreticalAssignments;
+
+        // Update local state with the new real assignments
+        setCourses((prevCourses) =>
+          prevCourses.map((course) =>
+            course.id === courseId
+              ? {
+                ...course,
+                assignments: realAssignments,
+              }
+              : course
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error applying theoretical assignments:", error);
+    }
+  };
+
   return (
     <CourseContext.Provider
       value={{
@@ -429,6 +459,7 @@ export function CourseProvider({ children }: { children: ComponentChildren }) {
         handleDeleteAssignment,
         handleAddAssignment,
         handleSyncTheoreticalAssignments,
+        handleApplyTheoreticalAssignments,
         handleSyncNow,
         handleBlur,
       }}

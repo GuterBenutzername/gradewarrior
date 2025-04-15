@@ -182,3 +182,45 @@ def resolve_sync_theoretical_assignments(_, _info, courseId):  # noqa: N803
         theoretical_assignments.append(theoretical_assignment)
 
     return theoretical_assignments
+
+
+@mutation.field("applyTheoreticalAssignments")
+def resolve_apply_theoretical_assignments(_, _info, courseId):  # noqa: N803
+    course_id = int(courseId)
+    course = DbOps.get_by_id("courses", course_id)
+
+    if not course:
+        msg = f"Course with ID {course_id} not found"
+        raise Exception(msg)
+
+    # Get theoretical assignments for this course
+    theoretical_assignments = db.execute_query(
+        "SELECT * FROM assignments WHERE course_id = ? AND is_theoretical = 1",
+        (course_id,),
+    )
+
+    # Delete existing real assignments
+    db.execute_command(
+        "DELETE FROM assignments WHERE course_id = ? AND is_theoretical = 0",
+        (course_id,),
+    )
+
+    # Create new real assignments based on theoretical ones
+    real_assignments = []
+    for assignment in theoretical_assignments:
+        # Create a new real assignment based on the theoretical one
+        real_id = db.execute_command(
+            "INSERT INTO assignments (name, grade, weight, course_id, is_theoretical) VALUES (?, ?, ?, ?, 0)",
+            (assignment["name"], assignment["grade"], assignment["weight"], course_id),
+        )
+
+        real_assignment = {
+            "id": real_id,
+            "name": assignment["name"],
+            "grade": assignment["grade"],
+            "weight": assignment["weight"],
+            "isTheoretical": False,
+        }
+        real_assignments.append(real_assignment)
+
+    return real_assignments

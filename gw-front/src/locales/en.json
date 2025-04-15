@@ -17,7 +17,8 @@
     "weight": "weight (%)",
     "realAssignments": "real",
     "theoreticalAssignments": "theoretical",
-    "syncWithReal": "sync with real"
+    "syncWithReal": "copy real assignments here",
+    "applyToReal": "copy theoretical assignments here"
   },
   "assignment": {
     "deleteAssignment": "delete assignment",

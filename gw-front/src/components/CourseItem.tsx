@@ -26,6 +26,7 @@ interface CourseItemProps {
     },
   ) => void;
   onSyncTheoreticalAssignments: (courseId: string) => void;
+  onApplyTheoreticalAssignments: (courseId: string) => void;
   onBlur?: () => void;
 }
 
@@ -37,6 +38,7 @@ export function CourseItem({
   onDeleteAssignment,
   onAddAssignment,
   onSyncTheoreticalAssignments,
+  onApplyTheoreticalAssignments,
   onBlur,
 }: CourseItemProps) {
   const { t } = useTranslation();
@@ -44,6 +46,10 @@ export function CourseItem({
 
   const handleSyncTheoreticalAssignments = () => {
     onSyncTheoreticalAssignments(course.id);
+  };
+
+  const handleApplyTheoreticalAssignments = () => {
+    onApplyTheoreticalAssignments(course.id);
   };
 
   return (
@@ -111,15 +117,13 @@ export function CourseItem({
           >
             {t("course.theoreticalAssignments")}
           </button>
-          {activeTab === "theoretical" && (
-            <button
-              type="button"
-              class={styles["sync-button"]}
-              onClick={handleSyncTheoreticalAssignments}
-            >
-              {t("course.syncWithReal")}
-            </button>
-          )}
+              <button
+                type="button"
+                class={styles["sync-button"]}
+                onClick={activeTab === "theoretical" ? handleSyncTheoreticalAssignments : handleApplyTheoreticalAssignments}
+              >
+                {activeTab == "theoretical" ? t("course.syncWithReal") : t("course.applyToReal")}
+              </button>
         </div>
       </div>
 

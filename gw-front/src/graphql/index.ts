@@ -85,4 +85,15 @@ export const MUTATIONS = {
       }
     }
   `,
+  APPLY_THEORETICAL_ASSIGNMENTS: gql`
+    mutation ApplyTheoreticalAssignments($courseId: ID!) {
+      applyTheoreticalAssignments(courseId: $courseId) {
+        id
+        name
+        grade
+        weight
+        isTheoretical
+      }
+    }
+  `,
 };
