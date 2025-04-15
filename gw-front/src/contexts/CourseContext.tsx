@@ -6,9 +6,9 @@ import { MUTATIONS, QUERIES } from "../graphql/index.ts";
 
 // Type for pending changes tracking
 type PendingChange = [
-  string, // type: "course" | "assignment"
-  string, // action: "update" | "delete"
-  UpdateCourseInput | UpdateAssignmentInput | { id: number }, // payload
+  "course" | "assignment",
+  "update" | "delete",
+  UpdateCourseInput | UpdateAssignmentInput | { id: number },
 ];
 
 interface CourseContextType {
@@ -74,9 +74,9 @@ export function CourseProvider({ children }: { children: ComponentChildren }) {
 
   // Pending changes management
   const schedulePendingChange = (
-    type: string,
+    type: "course" | "assignment",
     id: string,
-    action: string,
+    action: "delete" | "update",
     payload: UpdateCourseInput | UpdateAssignmentInput | { id: number },
   ) => {
     setPendingChanges((prev) => {
