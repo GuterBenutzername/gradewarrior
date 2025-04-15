@@ -15,9 +15,9 @@
     "assignmentName": "assignment name",
     "grade": "grade (%)",
     "weight": "weight (%)",
-    "realAssignments": "Real Assignments",
-    "theoreticalAssignments": "Theoretical Assignments",
-    "syncWithReal": "Sync with Real"
+    "realAssignments": "real",
+    "theoreticalAssignments": "theoretical",
+    "syncWithReal": "sync with real"
   },
   "assignment": {
     "deleteAssignment": "delete assignment",
